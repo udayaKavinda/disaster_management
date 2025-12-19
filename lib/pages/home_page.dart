@@ -1,13 +1,10 @@
 // -------------------- HOME PAGE --------------------
 // lib/main.dart
 import 'package:disaster_management/pages/report_form_page.dart';
-import 'package:disaster_management/pages/view_reports_page.dart';
 import 'package:disaster_management/pages/view_reports_page_admin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-
-
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -36,7 +33,7 @@ class HomePage extends StatelessWidget {
               color: Colors.black26,
               blurRadius: 6,
               offset: Offset(0, 3),
-            )
+            ),
           ],
         ),
         child: Row(
@@ -70,10 +67,7 @@ class HomePage extends StatelessWidget {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Colors.blue.shade700,
-                Colors.lightBlue.shade400,
-              ],
+              colors: [Colors.blue.shade700, Colors.lightBlue.shade400],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -135,13 +129,12 @@ class HomePage extends StatelessWidget {
                 context: context,
                 icon: Icons.map_outlined,
                 label: 'View Reports',
-                gradient: [
-                  Colors.indigo.shade400,
-                  Colors.indigo.shade600,
-                ],
+                gradient: [Colors.indigo.shade400, Colors.indigo.shade600],
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const ViewReportsPageAdmin()),
+                  MaterialPageRoute(
+                    builder: (_) => const ViewReportsPageAdmin(),
+                  ),
                 ),
               ),
 
@@ -152,8 +145,11 @@ class HomePage extends StatelessWidget {
                   padding: const EdgeInsets.all(12),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline,
-                          color: Colors.lightBlue.shade700, size: 34),
+                      Icon(
+                        Icons.info_outline,
+                        color: Colors.lightBlue.shade700,
+                        size: 34,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -172,5 +168,3 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-
-

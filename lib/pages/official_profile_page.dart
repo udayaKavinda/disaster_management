@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/report_service.dart'; // reuse or create official service
-import '../main.dart';
 import 'home_page.dart'; // for HomePage
 
 class OfficialProfilePage extends StatefulWidget {
@@ -46,7 +45,7 @@ class _OfficialProfilePageState extends State<OfficialProfilePage> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const HomePage()),
-            (_) => false,
+        (_) => false,
       );
     } else {
       _showError("Failed", "Could not save details. Please try again.");
@@ -63,7 +62,7 @@ class _OfficialProfilePageState extends State<OfficialProfilePage> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text("OK"),
-          )
+          ),
         ],
       ),
     );
@@ -107,7 +106,6 @@ class _OfficialProfilePageState extends State<OfficialProfilePage> {
               key: _formKey,
               child: Column(
                 children: [
-
                   // ---------- HUMAN ICON ----------
                   Card(
                     elevation: 4,
@@ -134,7 +132,7 @@ class _OfficialProfilePageState extends State<OfficialProfilePage> {
                       prefixIcon: Icon(Icons.badge_outlined),
                     ),
                     validator: (v) =>
-                    v!.trim().isEmpty ? "Name is required" : null,
+                        v!.trim().isEmpty ? "Name is required" : null,
                   ),
 
                   const SizedBox(height: 14),
@@ -175,8 +173,7 @@ class _OfficialProfilePageState extends State<OfficialProfilePage> {
                       ),
                     ],
                     onChanged: (v) => setState(() => _role = v),
-                    validator: (v) =>
-                    v == null ? "Please select a role" : null,
+                    validator: (v) => v == null ? "Please select a role" : null,
                   ),
 
                   const Spacer(),
@@ -188,13 +185,13 @@ class _OfficialProfilePageState extends State<OfficialProfilePage> {
                     child: ElevatedButton.icon(
                       icon: _saving
                           ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
+                              height: 18,
+                              width: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
                           : const Icon(Icons.save),
                       label: Text(
                         _saving ? "Saving..." : "Save Details",
@@ -206,10 +203,10 @@ class _OfficialProfilePageState extends State<OfficialProfilePage> {
                       onPressed: _saving
                           ? null
                           : () {
-                        if (_formKey.currentState!.validate()) {
-                          _save();
-                        }
-                      },
+                              if (_formKey.currentState!.validate()) {
+                                _save();
+                              }
+                            },
                     ),
                   ),
                 ],

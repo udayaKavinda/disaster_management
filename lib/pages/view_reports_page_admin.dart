@@ -1,7 +1,9 @@
+import 'package:disaster_management/pages/report_detail_page_admin.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 import '../services/report_service.dart';
 import 'report_detail_page.dart';
-import 'package:intl/intl.dart';
 
 class ViewReportsPageAdmin extends StatefulWidget {
   const ViewReportsPageAdmin({super.key});
@@ -52,55 +54,78 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin> {
   }
 
   String _formatDate(String iso) {
-    return DateFormat('yyyy-MM-dd  HH:mm')
-        .format(DateTime.parse(iso));
+    return DateFormat('yyyy-MM-dd  HH:mm').format(DateTime.parse(iso));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _styledAppBar("Submitted Reports"),
-      body: FutureBuilder<List<dynamic>>(
-        future: _reportsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: _styledAppBar("Submitted Reports"),
+        body: FutureBuilder<List<dynamic>>(
+          future: _reportsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (snapshot.data == null || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No reports submitted"));
-          }
+            if (snapshot.data == null || snapshot.data!.isEmpty) {
+              return const Center(child: Text("No reports submitted"));
+            }
 
-          final reports = snapshot.data!;
+            final reports = snapshot.data!;
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: reports.length,
-            itemBuilder: (_, i) {
-              final r = reports[i];
-              return Card(
-                child: ListTile(
-                  title: Text(
-                    _formatDate(r['createdAt']),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(r['reviewStatus']),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => _confirmDelete(r['_id']),
-                  ),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ReportDetailPage(reportId: r['_id']),
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        },
+            final pendingReports = reports
+                .where((r) => r['reviewStatus'] == 'Under review')
+                .toList();
+
+            final reviewedReports = reports
+                .where((r) => r['reviewStatus'] != 'Under review')
+                .toList();
+
+            return TabBarView(
+              children: [
+                _buildReportList(pendingReports),
+                _buildReportList(reviewedReports),
+              ],
+            );
+          },
+        ),
       ),
+    );
+  }
+
+  Widget _buildReportList(List<dynamic> reports) {
+    if (reports.isEmpty) {
+      return const Center(child: Text("No reports"));
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: reports.length,
+      itemBuilder: (_, i) {
+        final r = reports[i];
+        return Card(
+          child: ListTile(
+            title: Text(
+              _formatDate(r['createdAt']),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(r['reviewStatus']),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () => _confirmDelete(r['_id']),
+            ),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ReportDetailPageAdmin(reportId: r['_id']),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -123,8 +148,13 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin> {
           color: Colors.white,
         ),
       ),
+      bottom: const TabBar(
+        indicatorColor: Colors.white,
+        tabs: [
+          Tab(text: "Pending"),
+          Tab(text: "Reviewed"),
+        ],
+      ),
     );
   }
 }
-
-

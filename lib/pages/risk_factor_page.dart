@@ -73,7 +73,7 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
     );
   }
 
-// ================= PICK FROM CAMERA =================
+  // ================= PICK FROM CAMERA =================
   Future<void> _pickFromCamera() async {
     final picked = await _picker.pickImage(
       source: ImageSource.camera,
@@ -87,7 +87,7 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
     }
   }
 
-// ================= PICK FROM GALLERY =================
+  // ================= PICK FROM GALLERY =================
   Future<void> _pickFromGallery() async {
     final picked = await _picker.pickMultiImage(imageQuality: 70);
     if (picked.isNotEmpty) {
@@ -96,7 +96,6 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
       });
     }
   }
-
 
   void goNext() {
     final title = riskFactors[widget.index]["title"]!;
@@ -107,10 +106,8 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => RiskFactorPage(
-            report: widget.report,
-            index: widget.index + 1,
-          ),
+          builder: (_) =>
+              RiskFactorPage(report: widget.report, index: widget.index + 1),
         ),
       );
     } else {
@@ -151,196 +148,200 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
           ),
         ),
       ),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              /// SCROLLABLE CONTENT
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      /// IMAGE CARD
+                      Card(
+                        elevation: 6,
+                        shadowColor: Colors.black26,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Image.asset(
+                          risk["image"]!,
+                          height: 200,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                      ).animate().fadeIn(duration: 300.ms),
 
-                /// SCROLLABLE CONTENT
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
+                      const SizedBox(height: 16),
 
-                        /// IMAGE CARD
-                        Card(
-                          elevation: 6,
-                          shadowColor: Colors.black26,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                      /// DESCRIPTION CARD
+                      Card(
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: Colors.lightBlue.shade700,
+                                size: 34,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  risk["desc"]!,
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ),
+                            ],
                           ),
-                          clipBehavior: Clip.antiAlias,
-                          child: Image.asset(
-                            risk["image"]!,
-                            height: 200,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
-                        ).animate().fadeIn(duration: 300.ms),
+                        ),
+                      ),
 
-                        const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                        /// DESCRIPTION CARD
-                        Card(
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Row(
-                              children: [
-                                Icon(Icons.info_outline,
-                                    color: Colors.lightBlue.shade700, size: 34),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    risk["desc"]!,
-                                    style: Theme.of(context).textTheme.bodyMedium,
+                      /// QUESTION CARD
+                      Card(
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.help_outline,
+                                color: Colors.orange.shade700,
+                                size: 32,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Do you see "$title" in your area?',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
+                      ),
 
-                        const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
-                        /// QUESTION CARD
-                        Card(
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                      /// YES / NO
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () => setState(() => hasRisk = true),
+                              child: const Text("YES"),
+                            ),
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(14),
-                            child: Row(
-                              children: [
-                                Icon(Icons.help_outline,
-                                    color: Colors.orange.shade700, size: 32),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    'Do you see "$title" in your area?',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                setState(() => hasRisk = false);
+                                goNext();
+                              },
+                              child: const Text("NO"),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      /// IMAGE UPLOAD
+                      if (hasRisk == true) ...[
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.image),
+                          label: const Text("Upload Images (Optional)"),
+                          onPressed: _showImageSourceSheet,
+                        ),
+
+                        if (images.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 90,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: images.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(width: 10),
+                              itemBuilder: (_, i) => Stack(
+                                children: [
+                                  Card(
+                                    elevation: 4,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    clipBehavior: Clip.antiAlias,
+                                    child: Image.file(
+                                      images[i],
+                                      width: 90,
+                                      height: 90,
+                                      fit: BoxFit.cover,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        /// YES / NO
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () => setState(() => hasRisk = true),
-                                child: const Text("YES"),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  setState(() => hasRisk = false);
-                                  goNext();
-                                },
-                                child: const Text("NO"),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        /// IMAGE UPLOAD
-                        if (hasRisk == true) ...[
-                          const SizedBox(height: 16),
-                          ElevatedButton.icon(
-                            icon: const Icon(Icons.image),
-                            label: const Text("Upload Images (Optional)"),
-                            onPressed: _showImageSourceSheet,
-                          ),
-
-                          if (images.isNotEmpty) ...[
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              height: 90,
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: images.length,
-                                separatorBuilder: (_, __) =>
-                                const SizedBox(width: 10),
-                                itemBuilder: (_, i) => Stack(
-                                  children: [
-                                    Card(
-                                      elevation: 4,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      clipBehavior: Clip.antiAlias,
-                                      child: Image.file(
-                                        images[i],
-                                        width: 90,
-                                        height: 90,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: 4,
-                                      right: 4,
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          setState(() => images.removeAt(i));
-                                        },
-                                        child: Container(
-                                          decoration: const BoxDecoration(
-                                            color: Colors.black54,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          padding: const EdgeInsets.all(4),
-                                          child: const Icon(
-                                            Icons.close,
-                                            size: 16,
-                                            color: Colors.white,
-                                          ),
+                                  Positioned(
+                                    top: 4,
+                                    right: 4,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() => images.removeAt(i));
+                                      },
+                                      child: Container(
+                                        decoration: const BoxDecoration(
+                                          color: Colors.black54,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        padding: const EdgeInsets.all(4),
+                                        child: const Icon(
+                                          Icons.close,
+                                          size: 16,
+                                          color: Colors.white,
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
+                          ),
                         ],
                       ],
-                    ),
+                    ],
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 12),
+              const SizedBox(height: 12),
 
-                /// FIXED NEXT BUTTON
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: hasRisk == null ? null : goNext,
-                    child: const Text(
-                      "Next",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                    ),
+              /// FIXED NEXT BUTTON
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: hasRisk == null ? null : goNext,
+                  child: const Text(
+                    "Next",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
+      ),
     );
   }
 }
