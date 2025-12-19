@@ -23,6 +23,8 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
   final ImagePicker _picker = ImagePicker();
   List<File> images = [];
 
+  static const int maxImages = 5; // 🔒 limit to avoid crash
+
   @override
   void initState() {
     super.initState();
@@ -30,15 +32,6 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
     images = widget.report.riskImages[title] ?? [];
     hasRisk = widget.report.riskAnswers[title];
   }
-
-  // Future<void> pickImages() async {
-  //   final picked = await _picker.pickMultiImage(imageQuality: 70);
-  //   if (picked.isNotEmpty) {
-  //     setState(() {
-  //       images.addAll(picked.map((e) => File(e.path)));
-  //     });
-  //   }
-  // }
 
   // ================= IMAGE SOURCE SHEET =================
   void _showImageSourceSheet() {
@@ -75,25 +68,40 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
 
   // ================= PICK FROM CAMERA =================
   Future<void> _pickFromCamera() async {
-    final picked = await _picker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 70,
-    );
+    if (images.length >= maxImages) return;
 
-    if (picked != null) {
+    try {
+      final picked = await _picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 70,
+      );
+
+      if (!mounted || picked == null) return;
+
       setState(() {
         images.add(File(picked.path));
       });
+    } catch (e) {
+      debugPrint("Camera error: $e");
     }
   }
 
   // ================= PICK FROM GALLERY =================
   Future<void> _pickFromGallery() async {
-    final picked = await _picker.pickMultiImage(imageQuality: 70);
-    if (picked.isNotEmpty) {
+    if (images.length >= maxImages) return;
+
+    try {
+      final picked = await _picker.pickMultiImage(imageQuality: 70);
+
+      if (!mounted || picked.isEmpty) return;
+
       setState(() {
-        images.addAll(picked.map((e) => File(e.path)));
+        images.addAll(
+          picked.take(maxImages - images.length).map((e) => File(e.path)),
+        );
       });
+    } catch (e) {
+      debugPrint("Gallery error: $e");
     }
   }
 
@@ -103,7 +111,7 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
     widget.report.riskImages[title] = images;
 
     if (widget.index < riskFactors.length - 1) {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (_) =>
@@ -111,7 +119,7 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
         ),
       );
     } else {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (_) => SubmitReportPage(report: widget.report),
@@ -153,12 +161,10 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              /// SCROLLABLE CONTENT
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      /// IMAGE CARD
                       Card(
                         elevation: 6,
                         shadowColor: Colors.black26,
@@ -176,7 +182,6 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
 
                       const SizedBox(height: 16),
 
-                      /// DESCRIPTION CARD
                       Card(
                         elevation: 3,
                         shape: RoundedRectangleBorder(
@@ -205,7 +210,6 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
 
                       const SizedBox(height: 16),
 
-                      /// QUESTION CARD
                       Card(
                         elevation: 3,
                         shape: RoundedRectangleBorder(
@@ -237,7 +241,6 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
 
                       const SizedBox(height: 20),
 
-                      /// YES / NO
                       Row(
                         children: [
                           Expanded(
@@ -259,7 +262,6 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
                         ],
                       ),
 
-                      /// IMAGE UPLOAD
                       if (hasRisk == true) ...[
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
@@ -290,6 +292,8 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
                                       width: 90,
                                       height: 90,
                                       fit: BoxFit.cover,
+                                      cacheWidth: 180,
+                                      cacheHeight: 180,
                                     ),
                                   ),
                                   Positioned(
@@ -326,7 +330,6 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
 
               const SizedBox(height: 12),
 
-              /// FIXED NEXT BUTTON
               SizedBox(
                 width: double.infinity,
                 height: 52,
