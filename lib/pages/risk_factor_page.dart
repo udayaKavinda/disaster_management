@@ -23,7 +23,7 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
   final ImagePicker _picker = ImagePicker();
   List<File> images = [];
 
-  static const int maxImages = 5; // 🔒 limit to avoid crash
+  static const int maxImages = 5;
 
   @override
   void initState() {
@@ -68,7 +68,10 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
 
   // ================= PICK FROM CAMERA =================
   Future<void> _pickFromCamera() async {
-    if (images.length >= maxImages) return;
+    if (images.length >= maxImages) {
+      _showLimitSnackBar();
+      return;
+    }
 
     try {
       final picked = await _picker.pickImage(
@@ -88,12 +91,19 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
 
   // ================= PICK FROM GALLERY =================
   Future<void> _pickFromGallery() async {
-    if (images.length >= maxImages) return;
+    if (images.length >= maxImages) {
+      _showLimitSnackBar();
+      return;
+    }
 
     try {
       final picked = await _picker.pickMultiImage(imageQuality: 70);
 
       if (!mounted || picked.isEmpty) return;
+
+      if (picked.length + images.length > maxImages) {
+        _showLimitSnackBar();
+      }
 
       setState(() {
         images.addAll(
@@ -103,6 +113,15 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
     } catch (e) {
       debugPrint("Gallery error: $e");
     }
+  }
+
+  void _showLimitSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("You can upload a maximum of 5 images"),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   void goNext() {
