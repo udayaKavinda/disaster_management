@@ -146,4 +146,22 @@ class ReportService {
       return false;
     }
   }
+
+  static Future<bool> updateReportReview({
+    required String id,
+    required String reviewStatus,
+    required String feedback,
+  }) async {
+    final token = await AuthService.getToken();
+    final res = await http.patch(
+      Uri.parse("$baseUrl/$id"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({"reviewStatus": reviewStatus, "feedback": feedback}),
+    );
+
+    return res.statusCode == 200;
+  }
 }

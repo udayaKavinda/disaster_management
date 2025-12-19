@@ -1,9 +1,45 @@
 import 'package:flutter/material.dart';
+import '../config/api_config.dart';
 import '../services/report_service.dart';
+import 'report_feedback_page.dart';
 
-class ReportDetailPageAdmin extends StatelessWidget {
+class ReportDetailPageAdmin extends StatefulWidget {
   final String reportId;
   const ReportDetailPageAdmin({super.key, required this.reportId});
+
+  @override
+  State<ReportDetailPageAdmin> createState() => _ReportDetailPageAdminState();
+}
+
+class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
+  late Future<Map<String, dynamic>> _reportFuture;
+  String? _latestStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  void _load() {
+    _reportFuture = ReportService.fetchReportById(widget.reportId);
+  }
+
+  Future<void> _openFeedback() async {
+    final updated = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ReportFeedbackPage(
+          reportId: widget.reportId,
+          currentStatus: _latestStatus,
+        ),
+      ),
+    );
+
+    if (updated == true && mounted) {
+      setState(_load);
+    }
+  }
 
   Widget _info(String label, String value) {
     return Padding(
@@ -27,7 +63,7 @@ class ReportDetailPageAdmin extends StatelessWidget {
     return Scaffold(
       appBar: _styledAppBar("Report Details"),
       body: FutureBuilder<Map<String, dynamic>>(
-        future: ReportService.fetchReportById(reportId),
+        future: _reportFuture,
         builder: (context, snap) {
           if (!snap.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -35,9 +71,71 @@ class ReportDetailPageAdmin extends StatelessWidget {
 
           final r = snap.data!;
 
+          final Map<String, dynamic> riskImages =
+              (r['riskImages'] as Map<String, dynamic>?) ?? {};
+
+          final String reviewStatus = (r['reviewStatus'] ?? 'Under review')
+              .toString();
+          _latestStatus = reviewStatus;
+
+          final List<String> allImages = [];
+          final List<Map<String, dynamic>> categorizedImages = [];
+
+          riskImages.forEach((key, value) {
+            final List<String> images =
+                (value as List?)
+                    ?.map((e) => e.toString())
+                    .where((e) => e.isNotEmpty)
+                    .toList() ??
+                [];
+
+            final resolvedImages = images
+                .map((url) => _resolveImageUrl(url))
+                .toList();
+
+            final startIndex = allImages.length;
+            allImages.addAll(resolvedImages);
+
+            categorizedImages.add({
+              'key': key,
+              'resolved': resolvedImages,
+              'start': startIndex,
+              'hasImages': resolvedImages.isNotEmpty,
+            });
+          });
+
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: _statusColor(reviewStatus).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.flag),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Status: ',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    Chip(
+                      backgroundColor: _statusColor(reviewStatus),
+                      label: Text(
+                        reviewStatus,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(14),
@@ -48,6 +146,73 @@ class ReportDetailPageAdmin extends StatelessWidget {
                       _info("Address", r['address']),
                       _info("District", r['district']),
                       _info("GN Division", r['gnDivision']),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Uploaded Images",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (riskImages.isEmpty) const Text("No images uploaded"),
+                      ...categorizedImages.map((cat) {
+                        final String key = cat['key'] as String;
+                        final List<String> resolvedImages =
+                            (cat['resolved'] as List<String>);
+                        final int startIndex = cat['start'] as int;
+                        final bool hasImages = cat['hasImages'] as bool;
+
+                        if (!hasImages) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Text("$key: No images"),
+                          );
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                key,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 10,
+                                runSpacing: 10,
+                                children: List.generate(
+                                  resolvedImages.length,
+                                  (i) => _ImageThumb(
+                                    url: resolvedImages[i],
+                                    onTap: () => _showImageViewer(
+                                      context,
+                                      allImages,
+                                      startIndex + i,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
                     ],
                   ),
                 ),
@@ -109,6 +274,203 @@ class ReportDetailPageAdmin extends StatelessWidget {
           fontSize: 22,
           fontWeight: FontWeight.bold,
           color: Colors.white,
+        ),
+      ),
+      actions: [
+        IconButton(
+          tooltip: 'Add feedback',
+          icon: const Icon(Icons.save_alt),
+          onPressed: _openFeedback,
+        ),
+      ],
+    );
+  }
+
+  Color _statusColor(String status) {
+    final s = status.toLowerCase();
+    if (s.contains('evacuate') || s.contains('evacuave')) {
+      return Colors.deepOrange;
+    }
+    if (s.contains('discard')) {
+      return Colors.red;
+    }
+    if (s.contains('watch')) {
+      return Colors.amber; // watch
+    }
+    if (s.contains('monitor')) {
+      return Colors.blue;
+    }
+    return Colors.grey;
+  }
+
+  static String _resolveImageUrl(String raw) {
+    if (raw.startsWith('http')) return raw;
+    return Uri.parse(ApiConfig.base).resolve(raw).toString();
+  }
+
+  void _showImageViewer(
+    BuildContext context,
+    List<String> images,
+    int startIndex,
+  ) {
+    final controller = PageController(initialPage: startIndex);
+    int current = startIndex;
+
+    showDialog(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (context, setState) => Dialog(
+          insetPadding: const EdgeInsets.all(12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.black,
+                    child: PageView.builder(
+                      controller: controller,
+                      onPageChanged: (i) => setState(() => current = i),
+                      itemCount: images.length,
+                      itemBuilder: (_, i) {
+                        return InteractiveViewer(
+                          child: Center(
+                            child: Image.network(
+                              images[i],
+                              fit: BoxFit.contain,
+                              loadingBuilder: (context, child, progress) {
+                                if (progress == null) return child;
+                                return const Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, _, __) => const Icon(
+                                Icons.broken_image,
+                                color: Colors.white,
+                                size: 48,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => Navigator.of(context).pop(),
+                    child: const Padding(
+                      padding: EdgeInsets.all(6),
+                      child: Icon(Icons.close, color: Colors.white),
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.chevron_left,
+                        color: current > 0 ? Colors.white : Colors.white54,
+                        size: 32,
+                      ),
+                      onPressed: current > 0
+                          ? () => controller.previousPage(
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeInOut,
+                            )
+                          : null,
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.chevron_right,
+                        color: current < images.length - 1
+                            ? Colors.white
+                            : Colors.white54,
+                        size: 32,
+                      ),
+                      onPressed: current < images.length - 1
+                          ? () => controller.nextPage(
+                              duration: const Duration(milliseconds: 200),
+                              curve: Curves.easeInOut,
+                            )
+                          : null,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 8,
+                  right: 0,
+                  left: 0,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${current + 1} / ${images.length}',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ImageThumb extends StatelessWidget {
+  final String url;
+  final VoidCallback? onTap;
+
+  const _ImageThumb({required this.url, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          color: Colors.grey.shade200,
+          height: 96,
+          width: 96,
+          child: Image.network(
+            url,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, progress) {
+              if (progress == null) return child;
+              return const Center(
+                child: CircularProgressIndicator(strokeWidth: 2),
+              );
+            },
+            errorBuilder: (context, _, __) =>
+                const Icon(Icons.broken_image, size: 32),
+          ),
         ),
       ),
     );

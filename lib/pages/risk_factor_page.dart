@@ -4,6 +4,9 @@ import 'package:disaster_management/pages/submit_report_page.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 
 import '../models/report_data.dart';
 import '../utils/constants.dart';
@@ -31,6 +34,29 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
     final title = riskFactors[widget.index]["title"]!;
     images = widget.report.riskImages[title] ?? [];
     hasRisk = widget.report.riskAnswers[title];
+  }
+
+  // ================= IMAGE COMPRESSION =================
+  Future<File?> _compressImage(File file) async {
+    final dir = await getTemporaryDirectory();
+    final targetPath = p.join(
+      dir.path,
+      '${DateTime.now().millisecondsSinceEpoch}.jpg',
+    );
+
+    final XFile? compressedXFile =
+        await FlutterImageCompress.compressAndGetFile(
+          file.absolute.path,
+          targetPath,
+          quality: 70,
+          minWidth: 1280,
+          minHeight: 1280,
+          format: CompressFormat.jpeg,
+        );
+
+    if (compressedXFile == null) return null;
+
+    return File(compressedXFile.path);
   }
 
   // ================= IMAGE SOURCE SHEET =================
@@ -74,15 +100,15 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
     }
 
     try {
-      final picked = await _picker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 70,
-      );
+      final picked = await _picker.pickImage(source: ImageSource.camera);
 
       if (!mounted || picked == null) return;
 
+      final compressed = await _compressImage(File(picked.path));
+      if (compressed == null) return;
+
       setState(() {
-        images.add(File(picked.path));
+        images.add(compressed);
       });
     } catch (e) {
       debugPrint("Camera error: $e");
@@ -97,19 +123,21 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
     }
 
     try {
-      final picked = await _picker.pickMultiImage(imageQuality: 70);
+      final picked = await _picker.pickMultiImage();
 
       if (!mounted || picked.isEmpty) return;
 
-      if (picked.length + images.length > maxImages) {
-        _showLimitSnackBar();
+      final remaining = maxImages - images.length;
+      final selected = picked.take(remaining);
+
+      for (final xFile in selected) {
+        final compressed = await _compressImage(File(xFile.path));
+        if (compressed != null) {
+          images.add(compressed);
+        }
       }
 
-      setState(() {
-        images.addAll(
-          picked.take(maxImages - images.length).map((e) => File(e.path)),
-        );
-      });
+      setState(() {});
     } catch (e) {
       debugPrint("Gallery error: $e");
     }
