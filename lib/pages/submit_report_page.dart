@@ -110,7 +110,7 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text("OK"),
-          )
+          ),
         ],
       ),
     );
@@ -131,7 +131,7 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
         ),
         content: const Text(
           "Thank you for reporting.\n\n"
-              "We will carefully review your case and take necessary action as soon as possible.",
+          "We will carefully review your case and take necessary action as soon as possible.",
         ),
         actions: [
           ElevatedButton(
@@ -189,7 +189,7 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
     );
   }
 
-// ================= PICK FROM CAMERA =================
+  // ================= PICK FROM CAMERA =================
   Future<void> _pickFromCamera() async {
     final picked = await _picker.pickImage(
       source: ImageSource.camera,
@@ -203,7 +203,7 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
     }
   }
 
-// ================= PICK FROM GALLERY =================
+  // ================= PICK FROM GALLERY =================
   Future<void> _pickFromGallery() async {
     final picked = await _picker.pickMultiImage(imageQuality: 70);
     if (picked.isNotEmpty) {
@@ -212,7 +212,6 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
       });
     }
   }
-
 
   // ================= SUBMIT =================
   Future<void> _submit(BuildContext context) async {
@@ -235,7 +234,7 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
     widget.report.additionalNotes = _extraDesc.text.trim();
 
     // 🔹 SAVE IMAGES
-    widget.report.riskImages["additional"] = images;
+    widget.report.riskImages["Additional"] = images;
 
     final success = await ReportService.submitReport(widget.report);
 
@@ -292,8 +291,11 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
                 padding: const EdgeInsets.all(14),
                 child: Row(
                   children: [
-                    Icon(Icons.my_location,
-                        color: Colors.blue.shade700, size: 32),
+                    Icon(
+                      Icons.my_location,
+                      color: Colors.blue.shade700,
+                      size: 32,
+                    ),
                     const SizedBox(width: 12),
                     const Expanded(
                       child: Text(
@@ -393,7 +395,9 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
                 label: Text(
                   _submitting ? "Submitting..." : "Submit Report",
                   style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w600),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 onPressed: _submitting ? null : () => _submit(context),
               ),

@@ -70,9 +70,13 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
           }
 
           final r = snap.data!;
-
+          final Map<String, dynamic>? submittedBy =
+              r['submittedBy'] as Map<String, dynamic>?;
           final Map<String, dynamic> riskImages =
               (r['riskImages'] as Map<String, dynamic>?) ?? {};
+          final String additionalNotes = (r['additionalNotes'] ?? '')
+              .toString()
+              .trim();
 
           final String reviewStatus = (r['reviewStatus'] ?? 'Under review')
               .toString();
@@ -140,7 +144,16 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
                 child: Padding(
                   padding: const EdgeInsets.all(14),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const Text(
+                        "House owner details",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       _info("Owner Name", r['ownerName']),
                       _info("Contact", r['contact']),
                       _info("Address", r['address']),
@@ -152,7 +165,32 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
               ),
 
               const SizedBox(height: 16),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Reporter details",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _info("Name", submittedBy?['name']?.toString() ?? ""),
+                      _info(
+                        "Contact",
+                        submittedBy?['contact']?.toString() ?? "",
+                      ),
+                      _info("NIC", submittedBy?['nic']?.toString() ?? ""),
+                    ],
+                  ),
+                ),
+              ),
 
+              const SizedBox(height: 16),
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(14),
@@ -250,6 +288,31 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
                   ),
                 ),
               ),
+              if (additionalNotes.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Additional Notes",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          additionalNotes,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ],
           );
         },
