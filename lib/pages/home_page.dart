@@ -2,12 +2,32 @@
 // lib/main.dart
 import 'package:disaster_management/pages/report_form_page.dart';
 import 'package:disaster_management/pages/view_reports_page_admin.dart';
+import 'package:disaster_management/pages/view_reports_page.dart';
+import 'package:disaster_management/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
+
+  Future<void> _navigateToReports(BuildContext context) async {
+    final user = await AuthService.getCurrentUser();
+
+    if (!context.mounted) return;
+
+    if (user?.isAdmin ?? false) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const ViewReportsPageAdmin()),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const ViewReportsPage()),
+      );
+    }
+  }
 
   Widget _menuCardButton({
     required BuildContext context,
@@ -130,12 +150,7 @@ class HomePage extends StatelessWidget {
                 icon: Icons.map_outlined,
                 label: 'View Reports',
                 gradient: [Colors.indigo.shade400, Colors.indigo.shade600],
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const ViewReportsPageAdmin(),
-                  ),
-                ),
+                onTap: () => _navigateToReports(context),
               ),
 
               const SizedBox(height: 20),

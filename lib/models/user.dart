@@ -22,6 +22,7 @@ class User {
   }
 
   bool get emptyFields => title == null || title!.isEmpty;
+  bool get isAdmin => role != null && role!.isNotEmpty && role!.toLowerCase() == "admin";
 
   Map<String, dynamic> toJson() => {
     'id': id,
