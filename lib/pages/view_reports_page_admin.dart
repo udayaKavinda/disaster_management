@@ -1,9 +1,8 @@
-import 'package:disaster_management/pages/report_detail_page_admin.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../services/report_service.dart';
-import 'report_detail_page.dart';
+import 'report_detail_page_admin.dart';
 
 class ViewReportsPageAdmin extends StatefulWidget {
   const ViewReportsPageAdmin({super.key});
@@ -12,13 +11,29 @@ class ViewReportsPageAdmin extends StatefulWidget {
   State<ViewReportsPageAdmin> createState() => _ViewReportsPageAdminState();
 }
 
-class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin> {
+class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin>
+    with WidgetsBindingObserver {
   late Future<List<dynamic>> _reportsFuture;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadReports();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  /// ✅ Reload when app comes back from background
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() => _loadReports());
+    }
   }
 
   void _loadReports() {
@@ -34,19 +49,20 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin> {
         content: const Text("Are you sure you want to delete this report?"),
         actions: [
           TextButton(
-            child: const Text("Cancel"),
             onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
           ),
           ElevatedButton(
-            child: const Text("Delete"),
             onPressed: () async {
               Navigator.pop(context);
               await ReportService.deleteReport(id);
+              if (!mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text("Report deleted successfully")),
               );
               setState(() => _loadReports());
             },
+            child: const Text("Delete"),
           ),
         ],
       ),
@@ -54,7 +70,9 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin> {
   }
 
   String _formatDate(String iso) {
-    return DateFormat('yyyy-MM-dd  HH:mm').format(DateTime.parse(iso));
+    return DateFormat(
+      'yyyy-MM-dd  HH:mm',
+    ).format(DateTime.parse(iso).toLocal());
   }
 
   @override
@@ -70,7 +88,7 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin> {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (snapshot.data == null || snapshot.data!.isEmpty) {
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return const Center(child: Text("No reports submitted"));
             }
 
@@ -101,31 +119,45 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin> {
       return const Center(child: Text("No reports"));
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: reports.length,
-      itemBuilder: (_, i) {
-        final r = reports[i];
-        return Card(
-          child: ListTile(
-            title: Text(
-              _formatDate(r['createdAt']),
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(r['reviewStatus']),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () => _confirmDelete(r['_id']),
-            ),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ReportDetailPageAdmin(reportId: r['_id']),
-              ),
-            ),
-          ),
-        );
+    return RefreshIndicator(
+      onRefresh: () async {
+        setState(() => _loadReports());
       },
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: reports.length,
+        itemBuilder: (_, i) {
+          final r = reports[i];
+
+          return Card(
+            child: ListTile(
+              title: Text(
+                _formatDate(r['createdAt']),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(r['reviewStatus']),
+              trailing: IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () => _confirmDelete(r['_id']),
+              ),
+
+              /// ✅ Reload list after coming back from details page
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ReportDetailPageAdmin(reportId: r['_id']),
+                  ),
+                );
+
+                if (mounted) {
+                  setState(() => _loadReports());
+                }
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 
