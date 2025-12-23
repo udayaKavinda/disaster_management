@@ -135,7 +135,7 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin>
                 _formatDate(r['createdAt']),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              subtitle: Text(r['reviewStatus']),
+              subtitle: FlashingStatusText(text: r['reviewStatus']),
               trailing: IconButton(
                 icon: const Icon(Icons.delete, color: Colors.red),
                 onPressed: () => _confirmDelete(r['_id']),
@@ -186,6 +186,69 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin>
           Tab(text: "Pending"),
           Tab(text: "Reviewed"),
         ],
+      ),
+    );
+  }
+}
+
+class FlashingStatusText extends StatefulWidget {
+  final String text;
+  const FlashingStatusText({super.key, required this.text});
+
+  @override
+  State<FlashingStatusText> createState() => _FlashingStatusTextState();
+}
+
+class _FlashingStatusTextState extends State<FlashingStatusText>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Color?> _colorAnim;
+
+  Color _statusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'evacuate':
+        return Colors.deepOrange;
+      case 'discard':
+        return Colors.green;
+      case 'monitor':
+        return Colors.blue;
+      case 'watch':
+        return Colors.amber;
+      default:
+        return Colors.blueGrey;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    final baseColor = _statusColor(widget.text);
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+
+    _colorAnim = ColorTween(
+      begin: baseColor.withOpacity(0.4),
+      end: baseColor,
+    ).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _colorAnim,
+      builder: (_, __) => Text(
+        widget.text,
+        style: TextStyle(color: _colorAnim.value, fontWeight: FontWeight.w600),
       ),
     );
   }

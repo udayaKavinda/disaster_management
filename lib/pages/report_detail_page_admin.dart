@@ -351,11 +351,11 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
 
   Color _statusColor(String status) {
     final s = status.toLowerCase();
-    if (s.contains('evacuate') || s.contains('evacuave')) {
+    if (s.contains('evacuate')) {
       return Colors.deepOrange;
     }
     if (s.contains('discard')) {
-      return Colors.red;
+      return Colors.green;
     }
     if (s.contains('watch')) {
       return Colors.amber; // watch

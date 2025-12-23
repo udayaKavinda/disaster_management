@@ -52,8 +52,7 @@ class _ViewReportsPageState extends State<ViewReportsPage> {
   }
 
   String _formatDate(String iso) {
-    return DateFormat('yyyy-MM-dd  HH:mm')
-        .format(DateTime.parse(iso));
+    return DateFormat('yyyy-MM-dd  HH:mm').format(DateTime.parse(iso));
   }
 
   @override
@@ -127,10 +126,6 @@ class _ViewReportsPageState extends State<ViewReportsPage> {
   }
 }
 
-
-
-
-
 class FlashingStatusText extends StatefulWidget {
   final String text;
   const FlashingStatusText({super.key, required this.text});
@@ -146,12 +141,14 @@ class _FlashingStatusTextState extends State<FlashingStatusText>
 
   Color _statusColor(String status) {
     switch (status.toLowerCase()) {
-      case 'under review':
-        return Colors.orange;
-      case 'approved':
+      case 'evacuate':
+        return Colors.deepOrange;
+      case 'discard':
         return Colors.green;
-      case 'rejected':
-        return Colors.red;
+      case 'monitor':
+        return Colors.blue;
+      case 'watch':
+        return Colors.amber;
       default:
         return Colors.blueGrey;
     }
@@ -186,10 +183,7 @@ class _FlashingStatusTextState extends State<FlashingStatusText>
       animation: _colorAnim,
       builder: (_, __) => Text(
         widget.text,
-        style: TextStyle(
-          color: _colorAnim.value,
-          fontWeight: FontWeight.w600,
-        ),
+        style: TextStyle(color: _colorAnim.value, fontWeight: FontWeight.w600),
       ),
     );
   }

@@ -10,7 +10,12 @@ class ReportDetailPage extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
-          Expanded(child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold))),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
           Expanded(child: Text(value)),
         ],
       ),
@@ -29,10 +34,47 @@ class ReportDetailPage extends StatelessWidget {
           }
 
           final r = snap.data!;
+          final String reviewStatus = (r['reviewStatus'] ?? 'Under review')
+              .toString();
+          final String feedback = (r['feedback'] ?? '').toString().trim();
+
+          final statusColor = _statusColor(reviewStatus);
 
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              /// ---------------- Status Indicator ----------------
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.flag, color: statusColor),
+                    const SizedBox(width: 10),
+                    const Text(
+                      'Status:',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(width: 8),
+                    Chip(
+                      backgroundColor: statusColor,
+                      label: Text(
+                        reviewStatus,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              /// ---------------- Owner Details ----------------
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(14),
@@ -50,15 +92,20 @@ class ReportDetailPage extends StatelessWidget {
 
               const SizedBox(height: 16),
 
+              /// ---------------- Risk Factors ----------------
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(14),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Risk Factors",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16)),
+                      const Text(
+                        "Risk Factors",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                       const SizedBox(height: 8),
                       ...r['riskAnswers'].entries.map<Widget>((e) {
                         return Row(
@@ -76,6 +123,40 @@ class ReportDetailPage extends StatelessWidget {
                   ),
                 ),
               ),
+
+              /// ---------------- Feedback (LAST) ----------------
+              if (feedback.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: statusColor.withOpacity(0.4)),
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.comment, color: statusColor),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Official Feedback",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: statusColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(feedback, style: const TextStyle(fontSize: 14)),
+                    ],
+                  ),
+                ),
+              ],
             ],
           );
         },
@@ -83,6 +164,7 @@ class ReportDetailPage extends StatelessWidget {
     );
   }
 
+  /// ---------------- Styled AppBar ----------------
   AppBar _styledAppBar(String title) {
     return AppBar(
       elevation: 4,
@@ -103,5 +185,15 @@ class ReportDetailPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// ---------------- Status Colors ----------------
+  Color _statusColor(String status) {
+    final s = status.toLowerCase();
+    if (s.contains('evacuate')) return Colors.deepOrange;
+    if (s.contains('discard')) return Colors.green;
+    if (s.contains('watch')) return Colors.amber;
+    if (s.contains('monitor')) return Colors.blue;
+    return Colors.grey;
   }
 }
