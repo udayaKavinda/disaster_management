@@ -73,9 +73,6 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/lottie/login.png
-    - assets/lottie/incident.png
-    - assets/lottie/tor.png
     - assets/lottie/cracks.png
     - assets/lottie/rock.png
     - assets/lottie/slopes.png

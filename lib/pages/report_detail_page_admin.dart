@@ -82,6 +82,9 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
               .toString();
           _latestStatus = reviewStatus;
 
+          final String feedback = (r['feedback'] ?? '').toString().trim();
+          final statusColor = _statusColor(reviewStatus);
+
           final List<String> allImages = [];
           final List<Map<String, dynamic>> categorizedImages = [];
 
@@ -310,6 +313,38 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
                         ),
                       ],
                     ),
+                  ),
+                ),
+              ],
+              if (feedback.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: statusColor.withOpacity(0.4)),
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.comment, color: statusColor),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Official Feedback",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: statusColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(feedback, style: const TextStyle(fontSize: 14)),
+                    ],
                   ),
                 ),
               ],

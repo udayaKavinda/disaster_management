@@ -149,7 +149,10 @@ class _LoginPageState extends State<LoginPage> {
 
                                             final user =
                                                 await AuthService.getCurrentUser();
-                                            if (user?.emptyFields ?? true) {
+                                            if ((user?.isAdmin ?? false) ==
+                                                    false &&
+                                                (user?.emptyFields ?? true) ==
+                                                    true) {
                                               Navigator.pushReplacement(
                                                 context,
                                                 MaterialPageRoute(

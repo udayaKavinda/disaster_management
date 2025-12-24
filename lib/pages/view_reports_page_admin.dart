@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../services/report_service.dart';
+import '../widgets/ReportSearchDialog.dart';
 import 'report_detail_page_admin.dart';
 
 class ViewReportsPageAdmin extends StatefulWidget {
@@ -38,6 +39,10 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin>
 
   void _loadReports() {
     _reportsFuture = ReportService.fetchAllReports();
+  }
+
+  void _openSearchDialog() {
+    showDialog(context: context, builder: (_) => const ReportSearchDialog());
   }
 
   void _confirmDelete(String id) {
@@ -180,6 +185,14 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin>
           color: Colors.white,
         ),
       ),
+      actions: [
+        IconButton(
+          tooltip: 'Search reports',
+          icon: const Icon(Icons.search),
+          onPressed: _openSearchDialog,
+        ),
+      ],
+
       bottom: const TabBar(
         indicatorColor: Colors.white,
         tabs: [

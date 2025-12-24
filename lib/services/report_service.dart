@@ -96,33 +96,20 @@ class ReportService {
     throw Exception("Failed to load reports");
   }
 
-  static Future<Map<String, dynamic>> fetchReportById(String id) async {
+  static Future<List<dynamic>> searchReports(String query) async {
     final token = await AuthService.getToken();
     final res = await http.get(
-      Uri.parse("$baseUrl/$id"),
+      Uri.parse('$baseUrl/search?q=$query'),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
       },
     );
-    if (res.statusCode == 200) {
-      return json.decode(res.body);
-    }
-    throw Exception("Failed to load report");
-  }
 
-  static Future<void> deleteReport(String id) async {
-    final token = await AuthService.getToken();
-    final res = await http.delete(
-      Uri.parse("$baseUrl/$id"),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-    );
-    if (res.statusCode != 200) {
-      throw Exception("Delete failed");
+    if (res.statusCode == 200) {
+      return jsonDecode(res.body) as List<dynamic>;
     }
+    return [];
   }
 
   static Future<bool> saveOfficialDetails({
@@ -163,5 +150,34 @@ class ReportService {
     );
 
     return res.statusCode == 200;
+  }
+
+  static Future<Map<String, dynamic>> fetchReportById(String id) async {
+    final token = await AuthService.getToken();
+    final res = await http.get(
+      Uri.parse("$baseUrl/$id"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+    if (res.statusCode == 200) {
+      return json.decode(res.body);
+    }
+    throw Exception("Failed to load report");
+  }
+
+  static Future<void> deleteReport(String id) async {
+    final token = await AuthService.getToken();
+    final res = await http.delete(
+      Uri.parse("$baseUrl/$id"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+    if (res.statusCode != 200) {
+      throw Exception("Delete failed");
+    }
   }
 }
