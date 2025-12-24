@@ -3,7 +3,9 @@ import 'package:disaster_management/models/report_data.dart';
 import 'package:disaster_management/pages/risk_factor_page.dart';
 import 'package:disaster_management/utils/gn_list.dart';
 import 'package:flutter/material.dart';
+import '../config/app_routes.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart';
+import '../theme/app_theme.dart';
 
 class ReportFormPage extends StatefulWidget {
   const ReportFormPage({super.key});
@@ -24,11 +26,31 @@ class _ReportFormPageState extends State<ReportFormPage> {
   final ReportData report = ReportData();
 
   final List<String> districts = [
-    "Colombo","Gampaha","Kalutara","Kandy","Matale","Nuwara Eliya",
-    "Galle","Matara","Hambantota","Jaffna","Kilinochchi","Mannar",
-    "Mullaitivu","Vavuniya","Puttalam","Kurunegala","Anuradhapura",
-    "Polonnaruwa","Badulla","Monaragala","Ratnapura","Kegalle",
-    "Trincomalee","Batticaloa","Ampara"
+    "Colombo",
+    "Gampaha",
+    "Kalutara",
+    "Kandy",
+    "Matale",
+    "Nuwara Eliya",
+    "Galle",
+    "Matara",
+    "Hambantota",
+    "Jaffna",
+    "Kilinochchi",
+    "Mannar",
+    "Mullaitivu",
+    "Vavuniya",
+    "Puttalam",
+    "Kurunegala",
+    "Anuradhapura",
+    "Polonnaruwa",
+    "Badulla",
+    "Monaragala",
+    "Ratnapura",
+    "Kegalle",
+    "Trincomalee",
+    "Batticaloa",
+    "Ampara",
   ];
 
   @override
@@ -42,7 +64,10 @@ class _ReportFormPageState extends State<ReportFormPage> {
 
   // ------------------ FUZZY MATCH ------------------
   List<String> getFuzzyGNSuggestions(String query) {
-    if (_selectedDistrict == null || !locations.containsKey(_selectedDistrict!)) return [];
+    if (_selectedDistrict == null ||
+        !locations.containsKey(_selectedDistrict!)) {
+      return [];
+    }
 
     final gnList = locations[_selectedDistrict!]!
         .map((e) => e['name']!)
@@ -51,7 +76,7 @@ class _ReportFormPageState extends State<ReportFormPage> {
     final scored = gnList.map((gn) {
       return {
         'name': gn,
-        'score': ratio(query.toLowerCase(), gn.toLowerCase())
+        'score': ratio(query.toLowerCase(), gn.toLowerCase()),
       };
     }).toList();
 
@@ -68,13 +93,7 @@ class _ReportFormPageState extends State<ReportFormPage> {
         elevation: 4,
         centerTitle: true,
         flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue.shade700, Colors.lightBlue.shade400],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
+          decoration: BoxDecoration(gradient: AppTheme.primaryGradient),
         ),
         title: const Text(
           'Report Risk',
@@ -82,7 +101,7 @@ class _ReportFormPageState extends State<ReportFormPage> {
             fontSize: 22,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.1,
-            color: Colors.white,
+            color: AppTheme.white,
           ),
         ),
       ),
@@ -94,19 +113,18 @@ class _ReportFormPageState extends State<ReportFormPage> {
             key: _formKey,
             child: ListView(
               children: [
-
                 // ---------- ADMINISTRATIVE AREA ----------
                 Text(
                   "Administrative Area",
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.blueGrey,
+                    color: AppTheme.grey,
                   ),
                 ),
                 const SizedBox(height: 12),
 
                 DropdownButtonFormField<String>(
-                  value: _selectedDistrict,
+                  initialValue: _selectedDistrict,
                   decoration: const InputDecoration(labelText: "District"),
                   items: districts
                       .map((d) => DropdownMenuItem(value: d, child: Text(d)))
@@ -119,32 +137,36 @@ class _ReportFormPageState extends State<ReportFormPage> {
                     });
                   },
                   validator: (v) =>
-                  v == null ? "Please select a district" : null,
+                      v == null ? "Please select a district" : null,
                 ),
                 const SizedBox(height: 12),
 
                 TextFormField(
                   controller: _gnController,
-                  decoration:
-                  const InputDecoration(labelText: "Grama Niladhari Division"),
+                  decoration: const InputDecoration(
+                    labelText: "Grama Niladhari Division",
+                  ),
                   onChanged: (v) {
                     setState(() {
                       gnSuggestions = getFuzzyGNSuggestions(v);
                     });
                   },
-                  validator: (v) =>
-                  v == null || v.isEmpty ? "Please select a GN division" : null,
+                  validator: (v) => v == null || v.isEmpty
+                      ? "Please select a GN division"
+                      : null,
                 ),
 
-                ...gnSuggestions.map((gn) => ListTile(
-                  title: Text(gn),
-                  onTap: () {
-                    setState(() {
-                      _gnController.text = gn;
-                      gnSuggestions.clear();
-                    });
-                  },
-                )),
+                ...gnSuggestions.map(
+                  (gn) => ListTile(
+                    title: Text(gn),
+                    onTap: () {
+                      setState(() {
+                        _gnController.text = gn;
+                        gnSuggestions.clear();
+                      });
+                    },
+                  ),
+                ),
 
                 const SizedBox(height: 24),
 
@@ -153,22 +175,25 @@ class _ReportFormPageState extends State<ReportFormPage> {
                   "House Owner Details (Optional)",
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.blueGrey,
+                    color: AppTheme.grey,
                   ),
                 ),
                 const SizedBox(height: 12),
 
                 TextFormField(
                   controller: _ownerName,
-                  decoration: const InputDecoration(labelText: "Owner Name (Optional)"),
+                  decoration: const InputDecoration(
+                    labelText: "Owner Name (Optional)",
+                  ),
                 ),
                 const SizedBox(height: 12),
 
                 TextFormField(
                   controller: _ownerContact,
                   keyboardType: TextInputType.phone,
-                  decoration:
-                  const InputDecoration(labelText: "Contact Number (Optional)"),
+                  decoration: const InputDecoration(
+                    labelText: "Contact Number (Optional)",
+                  ),
                 ),
 
                 const SizedBox(height: 24),
@@ -183,8 +208,11 @@ class _ReportFormPageState extends State<ReportFormPage> {
                     padding: const EdgeInsets.all(14),
                     child: Row(
                       children: [
-                        Icon(Icons.help_outline,
-                            color: Colors.orange.shade700, size: 32),
+                        Icon(
+                          Icons.help_outline,
+                          color: AppTheme.accentDark,
+                          size: 32,
+                        ),
                         const SizedBox(width: 12),
                         const Expanded(
                           child: Text(
@@ -226,12 +254,10 @@ class _ReportFormPageState extends State<ReportFormPage> {
                         report.district = _selectedDistrict!;
                         report.gnDivision = _gnController.text.trim();
 
-                        Navigator.push(
+                        Navigator.pushNamed(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                RiskFactorPage(report: report, index: 0),
-                          ),
+                          AppRoutes.riskFactor,
+                          arguments: {'report': report, 'index': 0},
                         );
                       }
                     },

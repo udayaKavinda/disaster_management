@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import '../config/app_routes.dart';
 import '../config/api_config.dart';
 import '../services/report_service.dart';
 import 'report_feedback_page.dart';
+import '../theme/app_theme.dart';
+import '../widgets/styled_app_bar.dart';
+import '../widgets/status_chip.dart';
+import '../widgets/loading_widget.dart';
 
 class ReportDetailPageAdmin extends StatefulWidget {
   final String reportId;
@@ -26,14 +31,10 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
   }
 
   Future<void> _openFeedback() async {
-    final updated = await Navigator.push(
+    final updated = await Navigator.pushNamed(
       context,
-      MaterialPageRoute(
-        builder: (_) => ReportFeedbackPage(
-          reportId: widget.reportId,
-          currentStatus: _latestStatus,
-        ),
-      ),
+      AppRoutes.reportFeedback,
+      arguments: {'reportId': widget.reportId, 'currentStatus': _latestStatus},
     );
 
     if (updated == true && mounted) {
@@ -61,12 +62,21 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _styledAppBar("Report Details"),
+      appBar: StyledAppBar(
+        title: "Report Details",
+        actions: [
+          IconButton(
+            tooltip: 'Add feedback',
+            icon: const Icon(Icons.save_alt),
+            onPressed: _openFeedback,
+          ),
+        ],
+      ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _reportFuture,
         builder: (context, snap) {
           if (!snap.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return const LoadingWidget();
           }
 
           final r = snap.data!;
@@ -83,7 +93,7 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
           _latestStatus = reviewStatus;
 
           final String feedback = (r['feedback'] ?? '').toString().trim();
-          final statusColor = _statusColor(reviewStatus);
+          final statusColor = AppTheme.getStatusColor(reviewStatus);
 
           final List<String> allImages = [];
           final List<Map<String, dynamic>> categorizedImages = [];
@@ -121,7 +131,9 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
                 ),
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: _statusColor(reviewStatus).withOpacity(0.12),
+                  color: AppTheme.getStatusColor(
+                    reviewStatus,
+                  ).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -132,13 +144,7 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
                       'Status: ',
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
-                    Chip(
-                      backgroundColor: _statusColor(reviewStatus),
-                      label: Text(
-                        reviewStatus,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
+                    StatusChip(status: reviewStatus),
                   ],
                 ),
               ),
@@ -253,7 +259,7 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
                             ],
                           ),
                         );
-                      }).toList(),
+                      }),
                     ],
                   ),
                 ),
@@ -280,7 +286,9 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
                           children: [
                             Icon(
                               e.value ? Icons.warning : Icons.check,
-                              color: e.value ? Colors.red : Colors.green,
+                              color: e.value
+                                  ? AppTheme.danger
+                                  : AppTheme.success,
                             ),
                             const SizedBox(width: 8),
                             Expanded(child: Text(e.key)),
@@ -320,9 +328,11 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
                 const SizedBox(height: 16),
                 Container(
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.08),
+                    color: statusColor.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: statusColor.withOpacity(0.4)),
+                    border: Border.all(
+                      color: statusColor.withValues(alpha: 0.4),
+                    ),
                   ),
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -355,52 +365,6 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
     );
   }
 
-  AppBar _styledAppBar(String title) {
-    return AppBar(
-      elevation: 4,
-      centerTitle: true,
-      flexibleSpace: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blue.shade700, Colors.lightBlue.shade400],
-          ),
-        ),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-      actions: [
-        IconButton(
-          tooltip: 'Add feedback',
-          icon: const Icon(Icons.save_alt),
-          onPressed: _openFeedback,
-        ),
-      ],
-    );
-  }
-
-  Color _statusColor(String status) {
-    final s = status.toLowerCase();
-    if (s.contains('evacuate')) {
-      return Colors.deepOrange;
-    }
-    if (s.contains('discard')) {
-      return Colors.green;
-    }
-    if (s.contains('watch')) {
-      return Colors.amber; // watch
-    }
-    if (s.contains('monitor')) {
-      return Colors.blue;
-    }
-    return Colors.grey;
-  }
-
   static String _resolveImageUrl(String raw) {
     if (raw.startsWith('http')) return raw;
     return Uri.parse(ApiConfig.base).resolve(raw).toString();
@@ -428,7 +392,7 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
               children: [
                 Positioned.fill(
                   child: Container(
-                    color: Colors.black,
+                    color: AppTheme.black,
                     child: PageView.builder(
                       controller: controller,
                       onPageChanged: (i) => setState(() => current = i),
@@ -449,7 +413,7 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
                               },
                               errorBuilder: (context, _, __) => const Icon(
                                 Icons.broken_image,
-                                color: Colors.white,
+                                color: AppTheme.white,
                                 size: 48,
                               ),
                             ),
@@ -467,7 +431,7 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
                     onTap: () => Navigator.of(context).pop(),
                     child: const Padding(
                       padding: EdgeInsets.all(6),
-                      child: Icon(Icons.close, color: Colors.white),
+                      child: Icon(Icons.close, color: AppTheme.white),
                     ),
                   ),
                 ),
@@ -478,7 +442,9 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
                     child: IconButton(
                       icon: Icon(
                         Icons.chevron_left,
-                        color: current > 0 ? Colors.white : Colors.white54,
+                        color: current > 0
+                            ? AppTheme.white
+                            : const Color.fromARGB(255, 192, 192, 192),
                         size: 32,
                       ),
                       onPressed: current > 0
@@ -498,8 +464,8 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
                       icon: Icon(
                         Icons.chevron_right,
                         color: current < images.length - 1
-                            ? Colors.white
-                            : Colors.white54,
+                            ? AppTheme.white
+                            : const Color.fromARGB(255, 192, 192, 192),
                         size: 32,
                       ),
                       onPressed: current < images.length - 1
@@ -522,12 +488,12 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
+                        color: AppTheme.black.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         '${current + 1} / ${images.length}',
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(color: AppTheme.white),
                       ),
                     ),
                   ),
@@ -554,7 +520,7 @@ class _ImageThumb extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: Container(
-          color: Colors.grey.shade200,
+          color: AppTheme.greyLight,
           height: 96,
           width: 96,
           child: Image.network(

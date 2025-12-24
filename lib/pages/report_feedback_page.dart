@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/report_service.dart';
+import '../theme/app_theme.dart';
+import '../widgets/styled_app_bar.dart';
+import '../widgets/loading_widget.dart';
 
 class ReportFeedbackPage extends StatefulWidget {
   final String reportId;
@@ -88,7 +91,7 @@ class _ReportFeedbackPageState extends State<ReportFeedbackPage> {
     final words = _wordCount(_feedbackCtrl.text);
 
     return Scaffold(
-      appBar: _styledAppBar(),
+      appBar: const StyledAppBar(title: "Review & Feedback"),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -151,9 +154,9 @@ class _ReportFeedbackPageState extends State<ReportFeedbackPage> {
                       return ChoiceChip(
                         label: Text(status),
                         selected: selected,
-                        selectedColor: _statusColor(status),
+                        selectedColor: AppTheme.getStatusColor(status),
                         labelStyle: TextStyle(
-                          color: selected ? Colors.white : Colors.black,
+                          color: selected ? AppTheme.white : AppTheme.black,
                           fontWeight: selected
                               ? FontWeight.bold
                               : FontWeight.normal,
@@ -173,7 +176,10 @@ class _ReportFeedbackPageState extends State<ReportFeedbackPage> {
           if (_error != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: Text(_error!, style: const TextStyle(color: Colors.red)),
+              child: Text(
+                _error!,
+                style: const TextStyle(color: AppTheme.danger),
+              ),
             ),
 
           /// ---------------- Save Button ----------------
@@ -187,14 +193,7 @@ class _ReportFeedbackPageState extends State<ReportFeedbackPage> {
               ),
               onPressed: _submitting ? null : _submit,
               icon: _submitting
-                  ? const SizedBox(
-                      height: 16,
-                      width: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
+                  ? const ButtonLoadingWidget()
                   : const Icon(Icons.save),
               label: const Text(
                 "Save Feedback",
@@ -205,38 +204,5 @@ class _ReportFeedbackPageState extends State<ReportFeedbackPage> {
         ],
       ),
     );
-  }
-
-  /// ---------------- Styled AppBar ----------------
-  AppBar _styledAppBar() {
-    return AppBar(
-      elevation: 4,
-      centerTitle: true,
-      flexibleSpace: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blue.shade700, Colors.lightBlue.shade400],
-          ),
-        ),
-      ),
-      title: const Text(
-        "Review & Feedback",
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-
-  /// ---------------- Status Colors ----------------
-  Color _statusColor(String status) {
-    final s = status.toLowerCase();
-    if (s.contains('evacuate')) return Colors.deepOrange;
-    if (s.contains('discard')) return Colors.red;
-    if (s.contains('watch')) return Colors.amber;
-    if (s.contains('monitor')) return Colors.blue;
-    return Colors.grey;
   }
 }

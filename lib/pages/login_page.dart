@@ -1,10 +1,10 @@
 // lib/main.dart
 import 'package:disaster_management/pages/home_page.dart';
 import 'package:disaster_management/pages/official_profile_page.dart';
+import 'package:disaster_management/theme/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../config/app_routes.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:jwt_decode/jwt_decode.dart';
 import '../services/auth_service.dart';
 
 // -------------------- LOGIN PAGE --------------------
@@ -35,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.lightBlue.shade100, Colors.lightBlue.shade50],
+            colors: [AppTheme.primaryLight100, AppTheme.primaryLight50],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -66,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
                           errorBuilder: (ctx, _, __) => Icon(
                             Icons.safety_check_rounded,
                             size: maxWidth * 0.18,
-                            color: Colors.lightBlue.shade600,
+                            color: AppTheme.buttonPrimary,
                           ),
                         ),
                       ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.2),
@@ -149,24 +149,22 @@ class _LoginPageState extends State<LoginPage> {
 
                                             final user =
                                                 await AuthService.getCurrentUser();
+                                            if (!mounted) return;
                                             if ((user?.isAdmin ?? false) ==
                                                     false &&
                                                 (user?.emptyFields ?? true) ==
                                                     true) {
-                                              Navigator.pushReplacement(
+                                              if (!mounted) return;
+                                              Navigator.pushNamedAndRemoveUntil(
                                                 context,
-                                                MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      const OfficialProfilePage(),
-                                                ),
+                                                AppRoutes.officialProfile,
+                                                (_) => false,
                                               );
                                             } else {
-                                              Navigator.pushReplacement(
+                                              Navigator.pushNamedAndRemoveUntil(
                                                 context,
-                                                MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      const HomePage(),
-                                                ),
+                                                AppRoutes.home,
+                                                (_) => false,
                                               );
                                             }
                                           } catch (e) {
@@ -180,12 +178,14 @@ class _LoginPageState extends State<LoginPage> {
                                                     "",
                                                   ),
                                                 ),
-                                                backgroundColor: Colors.red,
+                                                backgroundColor:
+                                                    AppTheme.danger,
                                               ),
                                             );
                                           } finally {
-                                            if (mounted)
+                                            if (mounted) {
                                               setState(() => _busy = false);
+                                            }
                                           }
                                         }
                                       },

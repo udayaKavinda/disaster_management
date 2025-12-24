@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import '../config/app_routes.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +9,8 @@ import 'package:image_picker/image_picker.dart';
 
 import '../services/report_service.dart';
 import '../models/report_data.dart';
+import '../theme/app_theme.dart';
+import '../utils/dialog_utils.dart';
 
 class SubmitReportPage extends StatefulWidget {
   final ReportData report;
@@ -40,12 +43,13 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
   // ================= INTERNET CHECK =================
   Future<bool> _checkInternet(BuildContext context) async {
     final connectivityResult = await Connectivity().checkConnectivity();
+    if (!mounted) return false;
 
     if (connectivityResult == ConnectivityResult.none) {
-      _showError(
+      DialogUtils.showAlertDialog(
         context,
-        "No Internet Connection",
-        "Please turn on mobile data or Wi-Fi to submit the report.",
+        title: "No Internet Connection",
+        message: "Please turn on mobile data or Wi-Fi to submit the report.",
       );
       return false;
     }
@@ -54,13 +58,15 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
       final response = await http
           .get(Uri.parse("https://www.google.com"))
           .timeout(const Duration(seconds: 5));
+      if (!mounted) return false;
 
       return response.statusCode == 200;
     } catch (_) {
-      _showError(
+      DialogUtils.showAlertDialog(
         context,
-        "No Internet Access",
-        "You are connected to a network, but internet is not available.\nPlease try again.",
+        title: "No Internet Access",
+        message:
+            "You are connected to a network, but internet is not available.\nPlease try again.",
       );
       return false;
     }
@@ -69,26 +75,29 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
   // ================= LOCATION CHECK =================
   Future<Position?> _getLocation(BuildContext context) async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!mounted) return null;
     if (!serviceEnabled) {
-      _showError(
+      DialogUtils.showAlertDialog(
         context,
-        "Location Disabled",
-        "Please enable location services to submit the report.",
+        title: "Location Disabled",
+        message: "Please enable location services to submit the report.",
       );
       return null;
     }
 
     LocationPermission permission = await Geolocator.checkPermission();
+    if (!mounted) return null;
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
+      if (!mounted) return null;
     }
 
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
-      _showError(
+      DialogUtils.showAlertDialog(
         context,
-        "Permission Required",
-        "Location permission is required to submit the report.",
+        title: "Permission Required",
+        message: "Location permission is required to submit the report.",
       );
       return null;
     }
@@ -99,23 +108,6 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
   }
 
   // ================= ALERTS =================
-  void _showError(BuildContext context, String title, String msg) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(title),
-        content: Text(msg),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showSuccess(BuildContext context) {
     showDialog(
       context: context,
@@ -124,7 +116,7 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: const [
-            Icon(Icons.check_circle, color: Colors.green),
+            Icon(Icons.check_circle, color: AppTheme.success),
             SizedBox(width: 8),
             Text("Report Submitted"),
           ],
@@ -136,8 +128,12 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
         actions: [
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
-              Navigator.popUntil(context, (r) => r.isFirst);
+              Navigator.pop(context); // close dialog
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                AppRoutes.home,
+                (_) => false,
+              );
             },
             child: const Text("Done"),
           ),
@@ -145,16 +141,6 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
       ),
     );
   }
-
-  // // ================= IMAGE PICK =================
-  // Future<void> _pickImages() async {
-  //   final picked = await _picker.pickMultiImage(imageQuality: 70);
-  //   if (picked.isNotEmpty) {
-  //     setState(() {
-  //       images.addAll(picked.map((e) => File(e.path)));
-  //     });
-  //   }
-  // }
 
   // ================= IMAGE SOURCE SHEET =================
   void _showImageSourceSheet() {
@@ -219,13 +205,17 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
 
     final hasInternet = await _checkInternet(context);
     if (!hasInternet) {
-      setState(() => _submitting = false);
+      if (mounted) {
+        setState(() => _submitting = false);
+      }
       return;
     }
 
     final position = await _getLocation(context);
     if (position == null) {
-      setState(() => _submitting = false);
+      if (mounted) {
+        setState(() => _submitting = false);
+      }
       return;
     }
 
@@ -237,18 +227,24 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
     widget.report.riskImages["Additional"] = images;
 
     final success = await ReportService.submitReport(widget.report);
+    if (!mounted) return;
 
     if (!success) {
-      _showError(
+      DialogUtils.showAlertDialog(
         context,
-        "Submission Failed",
-        "Could not submit the report. Please try again.",
+        title: "Submission Failed",
+        message: "Could not submit the report. Please try again.",
       );
-      setState(() => _submitting = false);
+      if (mounted) {
+        setState(() => _submitting = false);
+      }
       return;
     }
+    if (!mounted) return;
 
-    setState(() => _submitting = false);
+    if (mounted) {
+      setState(() => _submitting = false);
+    }
     _showSuccess(context);
   }
 
@@ -260,13 +256,7 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
         elevation: 4,
         centerTitle: true,
         flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue.shade700, Colors.lightBlue.shade400],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
+          decoration: BoxDecoration(gradient: AppTheme.primaryGradient),
         ),
         title: const Text(
           "Submit Report",
@@ -274,7 +264,7 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
             fontSize: 22,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.1,
-            color: Colors.white,
+            color: AppTheme.white,
           ),
         ),
       ),
@@ -293,7 +283,7 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
                   children: [
                     Icon(
                       Icons.my_location,
-                      color: Colors.blue.shade700,
+                      color: AppTheme.buttonPrimaryDark,
                       size: 32,
                     ),
                     const SizedBox(width: 12),
@@ -316,7 +306,7 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
               decoration: InputDecoration(
                 hintText: "Additional details about the risks (optional)",
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppTheme.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide.none,
@@ -367,14 +357,14 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
                           },
                           child: Container(
                             decoration: const BoxDecoration(
-                              color: Colors.black54,
+                              color: AppTheme.black54,
                               shape: BoxShape.circle,
                             ),
                             padding: const EdgeInsets.all(4),
                             child: const Icon(
                               Icons.close,
                               size: 16,
-                              color: Colors.white,
+                              color: AppTheme.white,
                             ),
                           ),
                         ),

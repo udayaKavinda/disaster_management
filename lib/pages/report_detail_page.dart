@@ -1,5 +1,8 @@
+import 'package:disaster_management/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import '../services/report_service.dart';
+import '../widgets/styled_app_bar.dart';
+import '../widgets/status_chip.dart';
 
 class ReportDetailPage extends StatelessWidget {
   final String reportId;
@@ -25,7 +28,7 @@ class ReportDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _styledAppBar("Report Details"),
+      appBar: const StyledAppBar(title: "Report Details"),
       body: FutureBuilder<Map<String, dynamic>>(
         future: ReportService.fetchReportById(reportId),
         builder: (context, snap) {
@@ -38,7 +41,7 @@ class ReportDetailPage extends StatelessWidget {
               .toString();
           final String feedback = (r['feedback'] ?? '').toString().trim();
 
-          final statusColor = _statusColor(reviewStatus);
+          final statusColor = AppTheme.getStatusColor(reviewStatus);
 
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -51,7 +54,7 @@ class ReportDetailPage extends StatelessWidget {
                 ),
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.12),
+                  color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -63,13 +66,7 @@ class ReportDetailPage extends StatelessWidget {
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(width: 8),
-                    Chip(
-                      backgroundColor: statusColor,
-                      label: Text(
-                        reviewStatus,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
+                    StatusChip(status: reviewStatus),
                   ],
                 ),
               ),
@@ -129,9 +126,11 @@ class ReportDetailPage extends StatelessWidget {
                 const SizedBox(height: 16),
                 Container(
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.08),
+                    color: statusColor.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: statusColor.withOpacity(0.4)),
+                    border: Border.all(
+                      color: statusColor.withValues(alpha: 0.4),
+                    ),
                   ),
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -162,38 +161,5 @@ class ReportDetailPage extends StatelessWidget {
         },
       ),
     );
-  }
-
-  /// ---------------- Styled AppBar ----------------
-  AppBar _styledAppBar(String title) {
-    return AppBar(
-      elevation: 4,
-      centerTitle: true,
-      flexibleSpace: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blue.shade700, Colors.lightBlue.shade400],
-          ),
-        ),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-
-  /// ---------------- Status Colors ----------------
-  Color _statusColor(String status) {
-    final s = status.toLowerCase();
-    if (s.contains('evacuate')) return Colors.deepOrange;
-    if (s.contains('discard')) return Colors.green;
-    if (s.contains('watch')) return Colors.amber;
-    if (s.contains('monitor')) return Colors.blue;
-    return Colors.grey;
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../config/app_routes.dart';
 import '../services/report_service.dart'; // reuse or create official service
 import 'home_page.dart'; // for HomePage
+import '../theme/app_theme.dart';
 
 class OfficialProfilePage extends StatefulWidget {
   const OfficialProfilePage({super.key});
@@ -42,11 +44,7 @@ class _OfficialProfilePageState extends State<OfficialProfilePage> {
         const SnackBar(content: Text("Details saved successfully")),
       );
 
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
-        (_) => false,
-      );
+      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.home, (_) => false);
     } else {
       _showError("Failed", "Could not save details. Please try again.");
     }
@@ -78,13 +76,7 @@ class _OfficialProfilePageState extends State<OfficialProfilePage> {
         elevation: 4,
         centerTitle: true,
         flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue.shade700, Colors.lightBlue.shade400],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
+          decoration: BoxDecoration(gradient: AppTheme.primaryGradient),
         ),
         title: const Text(
           "Official Details",
@@ -92,7 +84,7 @@ class _OfficialProfilePageState extends State<OfficialProfilePage> {
             fontSize: 22,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.1,
-            color: Colors.white,
+            color: AppTheme.white,
           ),
         ),
       ),
@@ -117,7 +109,7 @@ class _OfficialProfilePageState extends State<OfficialProfilePage> {
                       child: Icon(
                         Icons.person,
                         size: 90,
-                        color: Colors.lightBlue.shade600,
+                        color: AppTheme.buttonPrimary,
                       ),
                     ),
                   ),
@@ -157,7 +149,7 @@ class _OfficialProfilePageState extends State<OfficialProfilePage> {
 
                   // ---------- ROLE ----------
                   DropdownButtonFormField<String>(
-                    value: _role,
+                    initialValue: _role,
                     decoration: const InputDecoration(
                       labelText: "Official Role",
                       prefixIcon: Icon(Icons.apartment_outlined),
@@ -189,7 +181,7 @@ class _OfficialProfilePageState extends State<OfficialProfilePage> {
                               width: 18,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                color: AppTheme.white,
                               ),
                             )
                           : const Icon(Icons.save),

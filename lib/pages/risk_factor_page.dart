@@ -10,6 +10,8 @@ import 'package:path/path.dart' as p;
 
 import '../models/report_data.dart';
 import '../utils/constants.dart';
+import '../theme/app_theme.dart';
+import '../config/app_routes.dart';
 
 class RiskFactorPage extends StatefulWidget {
   final ReportData report;
@@ -158,19 +160,16 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
     widget.report.riskImages[title] = images;
 
     if (widget.index < riskFactors.length - 1) {
-      Navigator.pushReplacement(
+      Navigator.pushNamed(
         context,
-        MaterialPageRoute(
-          builder: (_) =>
-              RiskFactorPage(report: widget.report, index: widget.index + 1),
-        ),
+        AppRoutes.riskFactor,
+        arguments: {'report': widget.report, 'index': widget.index + 1},
       );
     } else {
-      Navigator.pushReplacement(
+      Navigator.pushNamed(
         context,
-        MaterialPageRoute(
-          builder: (_) => SubmitReportPage(report: widget.report),
-        ),
+        AppRoutes.submitReport,
+        arguments: widget.report,
       );
     }
   }
@@ -185,13 +184,7 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
         elevation: 4,
         centerTitle: true,
         flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue.shade700, Colors.lightBlue.shade400],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
+          decoration: BoxDecoration(gradient: AppTheme.primaryGradient),
         ),
         title: Text(
           title,
@@ -199,7 +192,7 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
             fontSize: 22,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.1,
-            color: Colors.white,
+            color: AppTheme.white,
           ),
         ),
       ),
@@ -240,7 +233,7 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
                             children: [
                               Icon(
                                 Icons.info_outline,
-                                color: Colors.lightBlue.shade700,
+                                color: AppTheme.buttonPrimaryDark,
                                 size: 34,
                               ),
                               const SizedBox(width: 12),
@@ -268,7 +261,7 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
                             children: [
                               Icon(
                                 Icons.help_outline,
-                                color: Colors.orange.shade700,
+                                color: AppTheme.accentDark,
                                 size: 32,
                               ),
                               const SizedBox(width: 12),
@@ -352,14 +345,14 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
                                       },
                                       child: Container(
                                         decoration: const BoxDecoration(
-                                          color: Colors.black54,
+                                          color: AppTheme.black54,
                                           shape: BoxShape.circle,
                                         ),
                                         padding: const EdgeInsets.all(4),
                                         child: const Icon(
                                           Icons.close,
                                           size: 16,
-                                          color: Colors.white,
+                                          color: AppTheme.white,
                                         ),
                                       ),
                                     ),

@@ -45,7 +45,7 @@ class ReportService {
           await http.MultipartFile.fromPath(
             fieldName,
             file.path,
-            filename: '${fieldName}${p.extension(file.path)}', // preserve ext
+            filename: '$fieldName${p.extension(file.path)}', // preserve ext
           ),
         );
       }

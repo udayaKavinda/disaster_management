@@ -1,6 +1,6 @@
-import 'package:disaster_management/pages/report_detail_page_admin.dart';
 import 'package:disaster_management/services/report_service.dart';
 import 'package:flutter/material.dart';
+import '../config/app_routes.dart';
 
 class ReportSearchDialog extends StatefulWidget {
   const ReportSearchDialog({super.key});
@@ -94,11 +94,9 @@ class _ReportSearchDialogState extends State<ReportSearchDialog> {
                           trailing: const Icon(Icons.chevron_right, size: 18),
                           onTap: () {
                             Navigator.of(context).pop();
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    ReportDetailPageAdmin(reportId: r['_id']),
-                              ),
+                            Navigator.of(context).pushNamed(
+                              AppRoutes.reportDetailAdmin,
+                              arguments: r['_id'],
                             );
                           },
                         );
