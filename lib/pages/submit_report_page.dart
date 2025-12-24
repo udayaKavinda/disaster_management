@@ -13,7 +13,7 @@ import '../theme/app_theme.dart';
 import '../utils/dialog_utils.dart';
 
 class SubmitReportPage extends StatefulWidget {
-  final ReportData report;
+  final SubmitReport report;
   const SubmitReportPage({super.key, required this.report});
 
   @override

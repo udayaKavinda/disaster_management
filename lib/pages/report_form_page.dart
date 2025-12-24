@@ -23,7 +23,7 @@ class _ReportFormPageState extends State<ReportFormPage> {
   List<String> gnSuggestions = [];
 
   final _formKey = GlobalKey<FormState>();
-  final ReportData report = ReportData();
+  final SubmitReport report = SubmitReport();
 
   final List<String> districts = [
     "Colombo",

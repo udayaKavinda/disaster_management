@@ -30,7 +30,7 @@ class ReportDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const StyledAppBar(title: "Report Details"),
-      body: FutureBuilder<ResponseData>(
+      body: FutureBuilder<ReportResponse>(
         future: ReportService.fetchReportById(reportId),
         builder: (context, snap) {
           if (!snap.hasData) {

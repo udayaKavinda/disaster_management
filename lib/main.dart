@@ -73,12 +73,12 @@ class DisasterApp extends StatelessWidget {
             final args = settings.arguments as Map<String, dynamic>;
             return MaterialPageRoute(
               builder: (_) => RiskFactorPage(
-                report: args['report'] as ReportData,
+                report: args['report'] as SubmitReport,
                 index: args['index'] as int,
               ),
             );
           case AppRoutes.submitReport:
-            final report = settings.arguments as ReportData;
+            final report = settings.arguments as SubmitReport;
             return MaterialPageRoute(
               builder: (_) => SubmitReportPage(report: report),
             );

@@ -14,7 +14,7 @@ import '../theme/app_theme.dart';
 import '../config/app_routes.dart';
 
 class RiskFactorPage extends StatefulWidget {
-  final ReportData report;
+  final SubmitReport report;
   final int index;
 
   const RiskFactorPage({super.key, required this.report, required this.index});

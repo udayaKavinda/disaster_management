@@ -1,7 +1,8 @@
 // lib/models/report_data.dart
 import 'dart:io';
 
-class ReportData {
+/// Local submission payload (used when creating a report)
+class SubmitReport {
   String ownerName = '';
   String contact = '';
   String address = '';
@@ -17,18 +18,30 @@ class ReportData {
   double? longitude;
 }
 
-/// Response model from backend (extends ReportData for shared fields)
-class ResponseData extends ReportData {
+/// Response model from backend (read-only data returned by APIs)
+class ReportResponse {
   String id = '';
+  String ownerName = '';
+  String contact = '';
+  String address = '';
+  String district = '';
+  String gnDivision = '';
+  String additionalNotes = '';
+  String reviewStatus = 'Under review';
   String createdAt = '';
   String? feedback;
+
+  Map<String, bool> riskAnswers = {};
   Map<String, List<String>> riskImagesUrls = {};
   Map<String, dynamic>? submittedBy;
 
-  ResponseData();
+  double? latitude;
+  double? longitude;
 
-  factory ResponseData.fromJson(Map<String, dynamic> json) {
-    final r = ResponseData();
+  ReportResponse();
+
+  factory ReportResponse.fromJson(Map<String, dynamic> json) {
+    final r = ReportResponse();
     r.id = json['_id']?.toString() ?? '';
     r.ownerName = json['ownerName']?.toString() ?? '';
     r.contact = json['contact']?.toString() ?? '';
@@ -42,7 +55,6 @@ class ResponseData extends ReportData {
     r.latitude = (json['latitude'] as num?)?.toDouble();
     r.longitude = (json['longitude'] as num?)?.toDouble();
 
-    // risk answers
     final ra = json['riskAnswers'];
     if (ra is Map) {
       r.riskAnswers = ra.map((key, value) {
@@ -50,7 +62,6 @@ class ResponseData extends ReportData {
       });
     }
 
-    // risk images URLs
     final ri = json['riskImages'];
     if (ri is Map) {
       final Map<String, List<String>> urls = {};
@@ -66,7 +77,6 @@ class ResponseData extends ReportData {
       r.riskImagesUrls = urls;
     }
 
-    // submittedBy optional map
     if (json['submittedBy'] is Map<String, dynamic>) {
       r.submittedBy = Map<String, dynamic>.from(json['submittedBy']);
     }

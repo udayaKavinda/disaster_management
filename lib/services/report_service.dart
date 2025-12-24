@@ -9,7 +9,7 @@ import 'package:path/path.dart' as p;
 class ReportService {
   static const String baseUrl = ApiConfig.reports; // Android emulator
 
-  static Future<bool> submitReport(ReportData report) async {
+  static Future<bool> submitReport(SubmitReport report) async {
     final token = await AuthService.getToken();
     final request = http.MultipartRequest('POST', Uri.parse(baseUrl));
 
@@ -66,7 +66,7 @@ class ReportService {
     }
   }
 
-  static Future<List<ResponseData>> fetchReports() async {
+  static Future<List<ReportResponse>> fetchReports() async {
     final token = await AuthService.getToken();
     final res = await http.get(
       Uri.parse("$baseUrl/my"),
@@ -77,12 +77,12 @@ class ReportService {
     );
     if (res.statusCode == 200) {
       final List<dynamic> jsonList = json.decode(res.body);
-      return jsonList.map((e) => ResponseData.fromJson(e)).toList();
+      return jsonList.map((e) => ReportResponse.fromJson(e)).toList();
     }
     throw Exception("Failed to load reports");
   }
 
-  static Future<List<ResponseData>> fetchAllReports() async {
+  static Future<List<ReportResponse>> fetchAllReports() async {
     final token = await AuthService.getToken();
     final res = await http.get(
       Uri.parse(baseUrl),
@@ -93,12 +93,12 @@ class ReportService {
     );
     if (res.statusCode == 200) {
       final List<dynamic> jsonList = json.decode(res.body);
-      return jsonList.map((e) => ResponseData.fromJson(e)).toList();
+      return jsonList.map((e) => ReportResponse.fromJson(e)).toList();
     }
     throw Exception("Failed to load reports");
   }
 
-  static Future<List<ResponseData>> searchReports(String query) async {
+  static Future<List<ReportResponse>> searchReports(String query) async {
     final token = await AuthService.getToken();
     final res = await http.get(
       Uri.parse('$baseUrl/search?q=$query'),
@@ -110,7 +110,7 @@ class ReportService {
 
     if (res.statusCode == 200) {
       final List<dynamic> jsonList = jsonDecode(res.body);
-      return jsonList.map((e) => ResponseData.fromJson(e)).toList();
+      return jsonList.map((e) => ReportResponse.fromJson(e)).toList();
     }
     return [];
   }
@@ -155,7 +155,7 @@ class ReportService {
     return res.statusCode == 200;
   }
 
-  static Future<ResponseData> fetchReportById(String id) async {
+  static Future<ReportResponse> fetchReportById(String id) async {
     final token = await AuthService.getToken();
     final res = await http.get(
       Uri.parse("$baseUrl/$id"),
@@ -166,7 +166,7 @@ class ReportService {
     );
     if (res.statusCode == 200) {
       final Map<String, dynamic> data = json.decode(res.body);
-      return ResponseData.fromJson(data);
+      return ReportResponse.fromJson(data);
     }
     throw Exception("Failed to load report");
   }

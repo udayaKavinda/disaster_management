@@ -18,7 +18,7 @@ class ViewReportsPage extends StatefulWidget {
 }
 
 class _ViewReportsPageState extends State<ViewReportsPage> {
-  late Future<List<ResponseData>> _reportsFuture;
+  late Future<List<ReportResponse>> _reportsFuture;
 
   @override
   void initState() {
@@ -75,7 +75,7 @@ class _ViewReportsPageState extends State<ViewReportsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const StyledAppBar(title: "Submitted Reports"),
-      body: FutureBuilder<List<ResponseData>>(
+      body: FutureBuilder<List<ReportResponse>>(
         future: _reportsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

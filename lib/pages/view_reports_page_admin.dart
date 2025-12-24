@@ -21,7 +21,7 @@ class ViewReportsPageAdmin extends StatefulWidget {
 
 class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin>
     with WidgetsBindingObserver {
-  late Future<List<ResponseData>> _reportsFuture;
+  late Future<List<ReportResponse>> _reportsFuture;
 
   @override
   void initState() {
@@ -115,7 +115,7 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin>
             ],
           ),
         ),
-        body: FutureBuilder<List<ResponseData>>(
+        body: FutureBuilder<List<ReportResponse>>(
           future: _reportsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -151,7 +151,7 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin>
     );
   }
 
-  Widget _buildReportList(List<ResponseData> reports) {
+  Widget _buildReportList(List<ReportResponse> reports) {
     if (reports.isEmpty) {
       return const EmptyStateWidget(message: "No reports", icon: Icons.inbox);
     }

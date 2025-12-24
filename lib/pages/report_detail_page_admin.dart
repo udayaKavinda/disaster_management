@@ -18,7 +18,7 @@ class ReportDetailPageAdmin extends StatefulWidget {
 }
 
 class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
-  late Future<ResponseData> _reportFuture;
+  late Future<ReportResponse> _reportFuture;
   String? _latestStatus;
 
   @override
@@ -73,7 +73,7 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
           ),
         ],
       ),
-      body: FutureBuilder<ResponseData>(
+      body: FutureBuilder<ReportResponse>(
         future: _reportFuture,
         builder: (context, snap) {
           if (!snap.hasData) {

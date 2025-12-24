@@ -12,7 +12,7 @@ class ReportSearchDialog extends StatefulWidget {
 
 class _ReportSearchDialogState extends State<ReportSearchDialog> {
   final TextEditingController _ctrl = TextEditingController();
-  List<ResponseData> _results = [];
+  List<ReportResponse> _results = [];
   bool _loading = false;
   String _lastQuery = '';
 
