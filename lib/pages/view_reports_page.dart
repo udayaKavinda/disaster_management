@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/report_service.dart';
+import '../models/report_data.dart';
 import '../theme/app_theme.dart';
 import '../config/app_routes.dart';
 import '../widgets/flashing_status_text.dart';
@@ -17,7 +18,7 @@ class ViewReportsPage extends StatefulWidget {
 }
 
 class _ViewReportsPageState extends State<ViewReportsPage> {
-  late Future<List<dynamic>> _reportsFuture;
+  late Future<List<ResponseData>> _reportsFuture;
 
   @override
   void initState() {
@@ -60,14 +61,21 @@ class _ViewReportsPageState extends State<ViewReportsPage> {
   }
 
   String _formatDate(String iso) {
-    return DateFormat('yyyy-MM-dd  HH:mm').format(DateTime.parse(iso));
+    if (iso.isEmpty) return '-';
+    try {
+      return DateFormat(
+        'yyyy-MM-dd  HH:mm',
+      ).format(DateTime.parse(iso).toLocal());
+    } catch (_) {
+      return iso;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const StyledAppBar(title: "Submitted Reports"),
-      body: FutureBuilder<List<dynamic>>(
+      body: FutureBuilder<List<ResponseData>>(
         future: _reportsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -91,18 +99,18 @@ class _ViewReportsPageState extends State<ViewReportsPage> {
               return Card(
                 child: ListTile(
                   title: Text(
-                    _formatDate(r['createdAt']),
+                    _formatDate(r.createdAt),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: FlashingStatusText(text: r['reviewStatus']),
+                  subtitle: FlashingStatusText(text: r.reviewStatus),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: AppTheme.danger),
-                    onPressed: () => _confirmDelete(r['_id']),
+                    onPressed: () => _confirmDelete(r.id),
                   ),
                   onTap: () => Navigator.pushNamed(
                     context,
                     AppRoutes.reportDetail,
-                    arguments: r['_id'],
+                    arguments: r.id,
                   ),
                 ),
               );

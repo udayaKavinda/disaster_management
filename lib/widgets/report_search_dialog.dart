@@ -1,6 +1,7 @@
 import 'package:disaster_management/services/report_service.dart';
 import 'package:flutter/material.dart';
 import '../config/app_routes.dart';
+import '../models/report_data.dart';
 
 class ReportSearchDialog extends StatefulWidget {
   const ReportSearchDialog({super.key});
@@ -11,7 +12,7 @@ class ReportSearchDialog extends StatefulWidget {
 
 class _ReportSearchDialogState extends State<ReportSearchDialog> {
   final TextEditingController _ctrl = TextEditingController();
-  List<dynamic> _results = [];
+  List<ResponseData> _results = [];
   bool _loading = false;
   String _lastQuery = '';
 
@@ -85,18 +86,18 @@ class _ReportSearchDialogState extends State<ReportSearchDialog> {
                         final r = _results[i];
                         return ListTile(
                           title: Text(
-                            r['ownerName'] ?? 'Unknown',
+                            r.ownerName.isEmpty ? 'Unknown' : r.ownerName,
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                           subtitle: Text(
-                            '• ${r['reviewStatus']} • ${r['district']} • ${r['gnDivision']} • ${r['contact']}',
+                            '• ${r.reviewStatus} • ${r.district} • ${r.gnDivision} • ${r.contact}',
                           ),
                           trailing: const Icon(Icons.chevron_right, size: 18),
                           onTap: () {
                             Navigator.of(context).pop();
                             Navigator.of(context).pushNamed(
                               AppRoutes.reportDetailAdmin,
-                              arguments: r['_id'],
+                              arguments: r.id,
                             );
                           },
                         );

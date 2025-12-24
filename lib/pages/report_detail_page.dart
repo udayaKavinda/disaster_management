@@ -1,6 +1,7 @@
 import 'package:disaster_management/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import '../services/report_service.dart';
+import '../models/report_data.dart';
 import '../widgets/styled_app_bar.dart';
 import '../widgets/status_chip.dart';
 
@@ -29,7 +30,7 @@ class ReportDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const StyledAppBar(title: "Report Details"),
-      body: FutureBuilder<Map<String, dynamic>>(
+      body: FutureBuilder<ResponseData>(
         future: ReportService.fetchReportById(reportId),
         builder: (context, snap) {
           if (!snap.hasData) {
@@ -37,9 +38,8 @@ class ReportDetailPage extends StatelessWidget {
           }
 
           final r = snap.data!;
-          final String reviewStatus = (r['reviewStatus'] ?? 'Under review')
-              .toString();
-          final String feedback = (r['feedback'] ?? '').toString().trim();
+          final String reviewStatus = r.reviewStatus;
+          final String feedback = (r.feedback ?? '').trim();
 
           final statusColor = AppTheme.getStatusColor(reviewStatus);
 
@@ -77,11 +77,11 @@ class ReportDetailPage extends StatelessWidget {
                   padding: const EdgeInsets.all(14),
                   child: Column(
                     children: [
-                      _info("Owner Name", r['ownerName']),
-                      _info("Contact", r['contact']),
-                      _info("Address", r['address']),
-                      _info("District", r['district']),
-                      _info("GN Division", r['gnDivision']),
+                      _info("Owner Name", r.ownerName),
+                      _info("Contact", r.contact),
+                      _info("Address", r.address),
+                      _info("District", r.district),
+                      _info("GN Division", r.gnDivision),
                     ],
                   ),
                 ),
@@ -104,7 +104,7 @@ class ReportDetailPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      ...r['riskAnswers'].entries.map<Widget>((e) {
+                      ...r.riskAnswers.entries.map<Widget>((e) {
                         return Row(
                           children: [
                             Icon(

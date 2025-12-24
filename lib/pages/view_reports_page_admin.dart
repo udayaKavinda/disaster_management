@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../services/report_service.dart';
+import '../models/report_data.dart';
 import '../config/app_routes.dart';
 import '../widgets/report_search_dialog.dart';
 import '../theme/app_theme.dart';
@@ -20,7 +21,7 @@ class ViewReportsPageAdmin extends StatefulWidget {
 
 class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin>
     with WidgetsBindingObserver {
-  late Future<List<dynamic>> _reportsFuture;
+  late Future<List<ResponseData>> _reportsFuture;
 
   @override
   void initState() {
@@ -82,9 +83,14 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin>
   }
 
   String _formatDate(String iso) {
-    return DateFormat(
-      'yyyy-MM-dd  HH:mm',
-    ).format(DateTime.parse(iso).toLocal());
+    if (iso.isEmpty) return '-';
+    try {
+      return DateFormat(
+        'yyyy-MM-dd  HH:mm',
+      ).format(DateTime.parse(iso).toLocal());
+    } catch (_) {
+      return iso;
+    }
   }
 
   @override
@@ -109,7 +115,7 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin>
             ],
           ),
         ),
-        body: FutureBuilder<List<dynamic>>(
+        body: FutureBuilder<List<ResponseData>>(
           future: _reportsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -126,11 +132,11 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin>
             final reports = snapshot.data!;
 
             final pendingReports = reports
-                .where((r) => r['reviewStatus'] == 'Under review')
+                .where((r) => r.reviewStatus == 'Under review')
                 .toList();
 
             final reviewedReports = reports
-                .where((r) => r['reviewStatus'] != 'Under review')
+                .where((r) => r.reviewStatus != 'Under review')
                 .toList();
 
             return TabBarView(
@@ -145,7 +151,7 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin>
     );
   }
 
-  Widget _buildReportList(List<dynamic> reports) {
+  Widget _buildReportList(List<ResponseData> reports) {
     if (reports.isEmpty) {
       return const EmptyStateWidget(message: "No reports", icon: Icons.inbox);
     }
@@ -163,13 +169,13 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin>
           return Card(
             child: ListTile(
               title: Text(
-                _formatDate(r['createdAt']),
+                _formatDate(r.createdAt),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              subtitle: FlashingStatusText(text: r['reviewStatus']),
+              subtitle: FlashingStatusText(text: r.reviewStatus),
               trailing: IconButton(
                 icon: const Icon(Icons.delete, color: AppTheme.danger),
-                onPressed: () => _confirmDelete(r['_id']),
+                onPressed: () => _confirmDelete(r.id),
               ),
 
               /// ✅ Reload list after coming back from details page
@@ -177,7 +183,7 @@ class _ViewReportsPageAdminState extends State<ViewReportsPageAdmin>
                 await Navigator.pushNamed(
                   context,
                   AppRoutes.reportDetailAdmin,
-                  arguments: r['_id'],
+                  arguments: r.id,
                 );
 
                 if (mounted) {

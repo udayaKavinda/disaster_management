@@ -66,7 +66,7 @@ class ReportService {
     }
   }
 
-  static Future<List<dynamic>> fetchReports() async {
+  static Future<List<ResponseData>> fetchReports() async {
     final token = await AuthService.getToken();
     final res = await http.get(
       Uri.parse("$baseUrl/my"),
@@ -76,12 +76,13 @@ class ReportService {
       },
     );
     if (res.statusCode == 200) {
-      return json.decode(res.body);
+      final List<dynamic> jsonList = json.decode(res.body);
+      return jsonList.map((e) => ResponseData.fromJson(e)).toList();
     }
     throw Exception("Failed to load reports");
   }
 
-  static Future<List<dynamic>> fetchAllReports() async {
+  static Future<List<ResponseData>> fetchAllReports() async {
     final token = await AuthService.getToken();
     final res = await http.get(
       Uri.parse(baseUrl),
@@ -91,12 +92,13 @@ class ReportService {
       },
     );
     if (res.statusCode == 200) {
-      return json.decode(res.body);
+      final List<dynamic> jsonList = json.decode(res.body);
+      return jsonList.map((e) => ResponseData.fromJson(e)).toList();
     }
     throw Exception("Failed to load reports");
   }
 
-  static Future<List<dynamic>> searchReports(String query) async {
+  static Future<List<ResponseData>> searchReports(String query) async {
     final token = await AuthService.getToken();
     final res = await http.get(
       Uri.parse('$baseUrl/search?q=$query'),
@@ -107,7 +109,8 @@ class ReportService {
     );
 
     if (res.statusCode == 200) {
-      return jsonDecode(res.body) as List<dynamic>;
+      final List<dynamic> jsonList = jsonDecode(res.body);
+      return jsonList.map((e) => ResponseData.fromJson(e)).toList();
     }
     return [];
   }
@@ -152,7 +155,7 @@ class ReportService {
     return res.statusCode == 200;
   }
 
-  static Future<Map<String, dynamic>> fetchReportById(String id) async {
+  static Future<ResponseData> fetchReportById(String id) async {
     final token = await AuthService.getToken();
     final res = await http.get(
       Uri.parse("$baseUrl/$id"),
@@ -162,7 +165,8 @@ class ReportService {
       },
     );
     if (res.statusCode == 200) {
-      return json.decode(res.body);
+      final Map<String, dynamic> data = json.decode(res.body);
+      return ResponseData.fromJson(data);
     }
     throw Exception("Failed to load report");
   }

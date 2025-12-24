@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../config/app_routes.dart';
 import '../config/api_config.dart';
 import '../services/report_service.dart';
+import '../models/report_data.dart';
 import 'report_feedback_page.dart';
 import '../theme/app_theme.dart';
 import '../widgets/styled_app_bar.dart';
@@ -17,7 +18,7 @@ class ReportDetailPageAdmin extends StatefulWidget {
 }
 
 class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
-  late Future<Map<String, dynamic>> _reportFuture;
+  late Future<ResponseData> _reportFuture;
   String? _latestStatus;
 
   @override
@@ -72,7 +73,7 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
           ),
         ],
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
+      body: FutureBuilder<ResponseData>(
         future: _reportFuture,
         builder: (context, snap) {
           if (!snap.hasData) {
@@ -80,33 +81,21 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
           }
 
           final r = snap.data!;
-          final Map<String, dynamic>? submittedBy =
-              r['submittedBy'] as Map<String, dynamic>?;
-          final Map<String, dynamic> riskImages =
-              (r['riskImages'] as Map<String, dynamic>?) ?? {};
-          final String additionalNotes = (r['additionalNotes'] ?? '')
-              .toString()
-              .trim();
+          final Map<String, dynamic>? submittedBy = r.submittedBy;
+          final Map<String, List<String>> riskImages = r.riskImagesUrls;
+          final String additionalNotes = r.additionalNotes.trim();
 
-          final String reviewStatus = (r['reviewStatus'] ?? 'Under review')
-              .toString();
+          final String reviewStatus = r.reviewStatus;
           _latestStatus = reviewStatus;
 
-          final String feedback = (r['feedback'] ?? '').toString().trim();
+          final String feedback = (r.feedback ?? '').trim();
           final statusColor = AppTheme.getStatusColor(reviewStatus);
 
           final List<String> allImages = [];
           final List<Map<String, dynamic>> categorizedImages = [];
 
           riskImages.forEach((key, value) {
-            final List<String> images =
-                (value as List?)
-                    ?.map((e) => e.toString())
-                    .where((e) => e.isNotEmpty)
-                    .toList() ??
-                [];
-
-            final resolvedImages = images
+            final List<String> resolvedImages = value
                 .map((url) => _resolveImageUrl(url))
                 .toList();
 
@@ -163,11 +152,11 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      _info("Owner Name", r['ownerName']),
-                      _info("Contact", r['contact']),
-                      _info("Address", r['address']),
-                      _info("District", r['district']),
-                      _info("GN Division", r['gnDivision']),
+                      _info("Owner Name", r.ownerName),
+                      _info("Contact", r.contact),
+                      _info("Address", r.address),
+                      _info("District", r.district),
+                      _info("GN Division", r.gnDivision),
                     ],
                   ),
                 ),
@@ -281,7 +270,7 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      ...r['riskAnswers'].entries.map<Widget>((e) {
+                      ...r.riskAnswers.entries.map<Widget>((e) {
                         return Row(
                           children: [
                             Icon(
