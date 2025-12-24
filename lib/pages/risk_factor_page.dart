@@ -205,18 +205,41 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      Card(
-                        elevation: 6,
-                        shadowColor: Colors.black26,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: Image.asset(
-                          risk["image"]!,
-                          height: 200,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
+                      GestureDetector(
+                        onTap: hasRisk == true ? _showImageSourceSheet : null,
+                        child: Card(
+                          elevation: 6,
+                          shadowColor: Colors.black26,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: Stack(
+                            children: [
+                              Image.asset(
+                                risk["image"]!,
+                                height: 200,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                              if (hasRisk == true)
+                                Positioned.fill(
+                                  child: Container(
+                                    color: Colors.black.withValues(alpha: 0.45),
+                                    alignment: Alignment.center,
+                                    child: const Text(
+                                      "Click here to upload images",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ).animate().fadeIn(duration: 300.ms),
 
@@ -302,66 +325,57 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
                         ],
                       ),
 
-                      if (hasRisk == true) ...[
+                      if (hasRisk == true && images.isNotEmpty) ...[
                         const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          icon: const Icon(Icons.image),
-                          label: const Text("Upload Images (Optional)"),
-                          onPressed: _showImageSourceSheet,
-                        ),
-
-                        if (images.isNotEmpty) ...[
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            height: 90,
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: images.length,
-                              separatorBuilder: (_, __) =>
-                                  const SizedBox(width: 10),
-                              itemBuilder: (_, i) => Stack(
-                                children: [
-                                  Card(
-                                    elevation: 4,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    clipBehavior: Clip.antiAlias,
-                                    child: Image.file(
-                                      images[i],
-                                      width: 90,
-                                      height: 90,
-                                      fit: BoxFit.cover,
-                                      cacheWidth: 180,
-                                      cacheHeight: 180,
-                                    ),
+                        SizedBox(
+                          height: 90,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: images.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(width: 10),
+                            itemBuilder: (_, i) => Stack(
+                              children: [
+                                Card(
+                                  elevation: 4,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  Positioned(
-                                    top: 4,
-                                    right: 4,
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        setState(() => images.removeAt(i));
-                                      },
-                                      child: Container(
-                                        decoration: const BoxDecoration(
-                                          color: AppTheme.black54,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        padding: const EdgeInsets.all(4),
-                                        child: const Icon(
-                                          Icons.close,
-                                          size: 16,
-                                          color: AppTheme.white,
-                                        ),
+                                  clipBehavior: Clip.antiAlias,
+                                  child: Image.file(
+                                    images[i],
+                                    width: 90,
+                                    height: 90,
+                                    fit: BoxFit.cover,
+                                    cacheWidth: 180,
+                                    cacheHeight: 180,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() => images.removeAt(i));
+                                    },
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        color: AppTheme.black54,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      padding: const EdgeInsets.all(4),
+                                      child: const Icon(
+                                        Icons.close,
+                                        size: 16,
+                                        color: AppTheme.white,
                                       ),
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
+                        ),
                       ],
                     ],
                   ),
