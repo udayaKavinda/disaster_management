@@ -549,64 +549,56 @@ class _SubmitReportPageState extends State<SubmitReportPage> {
 
                             if (images.isNotEmpty) ...[
                               const SizedBox(height: 16),
-                              Card(
-                                elevation: 3,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12),
-                                  child: SizedBox(
-                                    height: 90,
-                                    child: ListView.separated(
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: images.length,
-                                      separatorBuilder: (_, __) =>
-                                          const SizedBox(width: 10),
-                                      itemBuilder: (_, i) => Stack(
-                                        children: [
-                                          Card(
-                                            elevation: 4,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            clipBehavior: Clip.antiAlias,
-                                            child: Image.file(
-                                              images[i],
-                                              width: 90,
-                                              height: 90,
-                                              fit: BoxFit.cover,
-                                            ),
+                              SizedBox(
+                                height: 90,
+                                child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: images.length,
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(width: 10),
+                                  itemBuilder: (_, i) => Stack(
+                                    children: [
+                                      Card(
+                                        elevation: 4,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
                                           ),
-                                          Positioned(
-                                            top: 4,
-                                            right: 4,
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                setState(() {
-                                                  images.removeAt(i);
-                                                });
-                                              },
-                                              child: Container(
-                                                decoration: const BoxDecoration(
-                                                  color: AppTheme.black54,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                padding: const EdgeInsets.all(
-                                                  4,
-                                                ),
-                                                child: const Icon(
-                                                  Icons.close,
-                                                  size: 16,
-                                                  color: AppTheme.white,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                        ),
+                                        clipBehavior: Clip.antiAlias,
+                                        child: Image.file(
+                                          images[i],
+                                          width: 90,
+                                          height: 90,
+                                          fit: BoxFit.cover,
+                                          cacheWidth: 180,
+                                          cacheHeight: 180,
+                                        ),
                                       ),
-                                    ),
+                                      Positioned(
+                                        top: 4,
+                                        right: 4,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              images.removeAt(i);
+                                            });
+                                          },
+                                          child: Container(
+                                            decoration: const BoxDecoration(
+                                              color: AppTheme.black54,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            padding: const EdgeInsets.all(4),
+                                            child: const Icon(
+                                              Icons.close,
+                                              size: 16,
+                                              color: AppTheme.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
