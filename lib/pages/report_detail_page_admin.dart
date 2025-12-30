@@ -157,6 +157,12 @@ class _ReportDetailPageAdminState extends State<ReportDetailPageAdmin> {
                       _info("Address", r.address),
                       _info("District", r.district),
                       _info("GN Division", r.gnDivision),
+                      _info(
+                        "Location",
+                        (r.latitude != null && r.longitude != null)
+                            ? "Lat: ${r.latitude}\nLng: ${r.longitude}"
+                            : "Not provided",
+                      ),
                     ],
                   ),
                 ),
