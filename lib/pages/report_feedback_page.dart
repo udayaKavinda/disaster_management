@@ -92,134 +92,155 @@ class _ReportFeedbackPageState extends State<ReportFeedbackPage> {
 
     return Scaffold(
       appBar: const StyledAppBar(title: "Review & Feedback"),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  /// ---------------- Feedback Card ----------------
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Admin Feedback",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          TextField(
-                            controller: _feedbackCtrl,
-                            maxLines: 6,
-                            minLines: 4,
-                            decoration: InputDecoration(
-                              hintText:
-                                  "Enter observations, warnings or instructions",
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 680),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            /// ---------------- Feedback Card ----------------
+                            Card(
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
                               ),
-                              helperText: '$words / 100 words',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  /// ---------------- Status Card ----------------
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Review Status",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Wrap(
-                            spacing: 10,
-                            runSpacing: 8,
-                            children: _statuses.map((status) {
-                              final selected = _selected == status;
-                              return ChoiceChip(
-                                label: Text(status),
-                                selected: selected,
-                                selectedColor: AppTheme.getStatusColor(status),
-                                labelStyle: TextStyle(
-                                  color: selected
-                                      ? AppTheme.white
-                                      : AppTheme.black,
-                                  fontWeight: selected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      "Admin Feedback",
+                                      style: TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    TextField(
+                                      controller: _feedbackCtrl,
+                                      maxLines: 6,
+                                      minLines: 4,
+                                      decoration: InputDecoration(
+                                        hintText:
+                                            "Enter observations, warnings or instructions",
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        helperText: '$words / 100 words',
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                onSelected: (_) =>
-                                    setState(() => _selected = status),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                              ),
+                            ),
 
-                  const SizedBox(height: 20),
-                  if (_error != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Text(
-                        _error!,
-                        style: const TextStyle(color: AppTheme.danger),
+                            const SizedBox(height: 16),
+
+                            /// ---------------- Status Card ----------------
+                            Card(
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      "Review Status",
+                                      style: TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Wrap(
+                                      spacing: 10,
+                                      runSpacing: 8,
+                                      children: _statuses.map((status) {
+                                        final selected = _selected == status;
+                                        return ChoiceChip(
+                                          label: Text(status),
+                                          selected: selected,
+                                          selectedColor:
+                                              AppTheme.getStatusColor(status),
+                                          labelStyle: TextStyle(
+                                            color: selected
+                                                ? AppTheme.white
+                                                : AppTheme.black,
+                                            fontWeight: selected
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                          ),
+                                          onSelected: (_) => setState(
+                                            () => _selected = status,
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            if (_error != null)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 4),
+                                child: Text(
+                                  _error!,
+                                  style: const TextStyle(
+                                    color: AppTheme.danger,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
-                ],
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: SizedBox(
+            width: double.infinity,
+            height: 60,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: _submitting ? null : _submit,
+              icon: _submitting
+                  ? const ButtonLoadingWidget()
+                  : const Icon(Icons.save),
+              label: const Text(
+                "Save Feedback",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: double.infinity,
-              height: 60,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: _submitting ? null : _submit,
-                icon: _submitting
-                    ? const ButtonLoadingWidget()
-                    : const Icon(Icons.save),
-                label: const Text(
-                  "Save Feedback",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
