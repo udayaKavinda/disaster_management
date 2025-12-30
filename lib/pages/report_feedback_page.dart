@@ -46,21 +46,16 @@ class _ReportFeedbackPageState extends State<ReportFeedbackPage> {
     super.dispose();
   }
 
-  int _wordCount(String text) {
-    return text.trim().isEmpty ? 0 : text.trim().split(RegExp(r'\s+')).length;
-  }
-
   Future<void> _submit() async {
     final feedback = _feedbackCtrl.text.trim();
-    final words = _wordCount(feedback);
 
     if (_selected == null) {
       setState(() => _error = 'Please select a review status');
       return;
     }
 
-    if (words > 100) {
-      setState(() => _error = 'Feedback must be 100 words or less');
+    if (feedback.length > 1000) {
+      setState(() => _error = 'Feedback must be 1000 characters or less');
       return;
     }
 
@@ -88,7 +83,7 @@ class _ReportFeedbackPageState extends State<ReportFeedbackPage> {
 
   @override
   Widget build(BuildContext context) {
-    final words = _wordCount(_feedbackCtrl.text);
+    final chars = _feedbackCtrl.text.length;
 
     return Scaffold(
       appBar: const StyledAppBar(title: "Review & Feedback"),
@@ -127,8 +122,10 @@ class _ReportFeedbackPageState extends State<ReportFeedbackPage> {
                                     const SizedBox(height: 12),
                                     TextField(
                                       controller: _feedbackCtrl,
-                                      maxLines: 6,
-                                      minLines: 4,
+                                      maxLines: 10,
+                                      minLines: 6,
+                                      maxLength: 1000,
+                                      onChanged: (_) => setState(() {}),
                                       decoration: InputDecoration(
                                         hintText:
                                             "Enter observations, warnings or instructions",
@@ -137,7 +134,6 @@ class _ReportFeedbackPageState extends State<ReportFeedbackPage> {
                                             12,
                                           ),
                                         ),
-                                        helperText: '$words / 100 words',
                                       ),
                                     ),
                                   ],

@@ -4,9 +4,6 @@ import 'package:disaster_management/pages/submit_report_page.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 
 import '../models/report_data.dart';
 import '../utils/constants.dart';
@@ -27,6 +24,7 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
   bool? hasRisk;
   final ImagePicker _picker = ImagePicker();
   List<File> images = [];
+  bool _recoveringLost = false;
 
   static const int maxImages = 5;
 
@@ -36,29 +34,34 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
     final title = riskFactors[widget.index]["title"]!;
     images = widget.report.riskImages[title] ?? [];
     hasRisk = widget.report.riskAnswers[title];
+    _recoverLostData();
   }
 
-  // ================= IMAGE COMPRESSION =================
-  Future<File?> _compressImage(File file) async {
-    final dir = await getTemporaryDirectory();
-    final targetPath = p.join(
-      dir.path,
-      '${DateTime.now().millisecondsSinceEpoch}.jpg',
-    );
+  Future<void> _recoverLostData() async {
+    if (_recoveringLost) return;
+    _recoveringLost = true;
+    final response = await _picker.retrieveLostData();
+    if (!mounted) return;
 
-    final XFile? compressedXFile =
-        await FlutterImageCompress.compressAndGetFile(
-          file.absolute.path,
-          targetPath,
-          quality: 70,
-          minWidth: 1280,
-          minHeight: 1280,
-          format: CompressFormat.jpeg,
-        );
+    if (response.isEmpty) {
+      _recoveringLost = false;
+      return;
+    }
 
-    if (compressedXFile == null) return null;
+    final addFile = (XFile x) {
+      if (images.length >= maxImages) return;
+      images.add(File(x.path));
+    };
 
-    return File(compressedXFile.path);
+    if (response.file != null) addFile(response.file!);
+    if (response.files != null) {
+      for (final f in response.files!) {
+        addFile(f);
+      }
+    }
+
+    setState(() {});
+    _recoveringLost = false;
   }
 
   // ================= IMAGE SOURCE SHEET =================
@@ -106,11 +109,8 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
 
       if (!mounted || picked == null) return;
 
-      final compressed = await _compressImage(File(picked.path));
-      if (compressed == null) return;
-
       setState(() {
-        images.add(compressed);
+        images.add(File(picked.path));
       });
     } catch (e) {
       debugPrint("Camera error: $e");
@@ -132,14 +132,11 @@ class _RiskFactorPageState extends State<RiskFactorPage> {
       final remaining = maxImages - images.length;
       final selected = picked.take(remaining);
 
-      for (final xFile in selected) {
-        final compressed = await _compressImage(File(xFile.path));
-        if (compressed != null) {
-          images.add(compressed);
+      setState(() {
+        for (final xFile in selected) {
+          images.add(File(xFile.path));
         }
-      }
-
-      setState(() {});
+      });
     } catch (e) {
       debugPrint("Gallery error: $e");
     }

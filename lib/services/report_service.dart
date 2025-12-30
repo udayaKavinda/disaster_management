@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/report_data.dart';
 import 'auth_service.dart';
@@ -10,59 +11,67 @@ class ReportService {
   static const String baseUrl = ApiConfig.reports; // Android emulator
 
   static Future<bool> submitReport(SubmitReport report) async {
-    final token = await AuthService.getToken();
-    final request = http.MultipartRequest('POST', Uri.parse(baseUrl));
-
-    if (token != null) {
-      request.headers['Authorization'] = 'Bearer $token';
-    }
-
-    request.fields.addAll({
-      'ownerName': report.ownerName,
-      'contact': report.contact,
-      'address': report.address,
-      'district': report.district,
-      'gnDivision': report.gnDivision,
-      'additionalNotes': report.additionalNotes,
-      'reviewStatus': 'Under review',
-      'riskAnswers': jsonEncode(report.riskAnswers),
-    });
-
-    if (report.latitude != null) {
-      request.fields['latitude'] = report.latitude.toString();
-    }
-    if (report.longitude != null) {
-      request.fields['longitude'] = report.longitude.toString();
-    }
-
-    report.riskImages.forEach((category, files) async {
-      for (var i = 0; i < files.length; i++) {
-        final File file = files[i];
-        if (file.path.isEmpty) continue;
-
-        final fieldName = 'riskImages[$category][$i]';
-        request.files.add(
-          await http.MultipartFile.fromPath(
-            fieldName,
-            file.path,
-            filename: '$fieldName${p.extension(file.path)}', // preserve ext
-          ),
-        );
-      }
-    });
-
-    final streamedResponse = await request.send();
-    final responseBody = await streamedResponse.stream.bytesToString();
-
-    if (streamedResponse.statusCode == 201) {
-      return true;
-    }
-
     try {
-      final Map<String, dynamic> error = jsonDecode(responseBody);
-      throw Exception(error['message'] ?? 'Report submission failed');
-    } catch (_) {
-      throw Exception('Report submission failed');
+      final token = await AuthService.getToken();
+      final request = http.MultipartRequest('POST', Uri.parse(baseUrl));
+
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+
+      request.fields.addAll({
+        'ownerName': report.ownerName,
+        'contact': report.contact,
+        'address': report.address,
+        'district': report.district,
+        'gnDivision': report.gnDivision,
+        'additionalNotes': report.additionalNotes,
+        'reviewStatus': 'Under review',
+        'riskAnswers': jsonEncode(report.riskAnswers),
+      });
+
+      if (report.latitude != null) {
+        request.fields['latitude'] = report.latitude.toString();
+      }
+      if (report.longitude != null) {
+        request.fields['longitude'] = report.longitude.toString();
+      }
+
+      // Add images synchronously to avoid finalization issues
+      for (var entry in report.riskImages.entries) {
+        final category = entry.key;
+        final files = entry.value;
+
+        for (var i = 0; i < files.length; i++) {
+          final File file = files[i];
+          if (file.path.isEmpty) continue;
+
+          final fieldName = 'riskImages[$category][$i]';
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              fieldName,
+              file.path,
+              filename: '$fieldName${p.extension(file.path)}', // preserve ext
+            ),
+          );
+        }
+      }
+
+      final streamedResponse = await request.send();
+      final responseBody = await streamedResponse.stream.bytesToString();
+
+      if (streamedResponse.statusCode == 201) {
+        return true;
+      }
+
+      debugPrint(
+        'Report submit failed status=${streamedResponse.statusCode}, body=$responseBody',
+      );
+
+      return false;
+    } catch (e, st) {
+      debugPrint('Report submit exception: $e\n$st');
+      return false;
     }
   }
 
