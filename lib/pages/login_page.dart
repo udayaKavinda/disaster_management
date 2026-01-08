@@ -1,7 +1,5 @@
 // lib/main.dart
-import 'package:disaster_management/pages/home_page.dart';
-import 'package:disaster_management/pages/official_profile_page.dart';
-import 'package:disaster_management/theme/app_theme.dart';
+import 'package:landslide_risk_reporter/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import '../config/app_routes.dart';
 import 'package:flutter_animate/flutter_animate.dart';

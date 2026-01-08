@@ -1,5 +1,5 @@
-name: disaster_management
-description: "A new Flutter project."
+name: landslide_risk_reporter
+description: "This app enables users to submit information about potential landslide risk locations for information-sharing and research purposes only. It is part of an academic and exploratory research effort associated with the National Building Research Organisation (NBRO) to study possible improvements to future landslide risk reporting systems. This app does not provide official assessments, predictions, warnings, or emergency alerts."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

@@ -83,8 +83,6 @@ class _ReportFeedbackPageState extends State<ReportFeedbackPage> {
 
   @override
   Widget build(BuildContext context) {
-    final chars = _feedbackCtrl.text.length;
-
     return Scaffold(
       appBar: const StyledAppBar(title: "Review & Feedback"),
       body: SafeArea(

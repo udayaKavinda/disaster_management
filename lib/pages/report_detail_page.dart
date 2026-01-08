@@ -1,4 +1,4 @@
-import 'package:disaster_management/theme/app_theme.dart';
+import 'package:landslide_risk_reporter/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import '../services/report_service.dart';
 import '../models/report_data.dart';

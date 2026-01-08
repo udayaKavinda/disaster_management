@@ -1,7 +1,6 @@
 // lib/main.dart
-import 'package:disaster_management/models/report_data.dart';
-import 'package:disaster_management/pages/risk_factor_page.dart';
-import 'package:disaster_management/utils/gn_list.dart';
+import 'package:landslide_risk_reporter/models/report_data.dart';
+import 'package:landslide_risk_reporter/utils/gn_list.dart';
 import 'package:flutter/material.dart';
 import '../config/app_routes.dart';
 import 'package:fuzzywuzzy/fuzzywuzzy.dart';
